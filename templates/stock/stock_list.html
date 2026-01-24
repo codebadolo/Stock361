@@ -1,0 +1,580 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Stock{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-boxes"></i> Gestion du Stock
+        </li>
+    </ol>
+</nav> -->
+
+<!-- En-tête avec titre et actions -->
+<div class="d-flex justify-content-between align-items-center mb-1">
+    <div>
+        <h1 class="mb-1">
+            <i class="bi bi-boxes me-2"></i>Gestion du Stock
+        </h1>
+        <p class="text-muted mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Suivez et gérez l'inventaire de votre entreprise
+        </p>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{% url 'mouvement_create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Nouveau mouvement
+        </a>
+        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-gear me-1"></i> Actions
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'produit:produit_list' %}"><i class="bi bi-box-seam me-2"></i> Voir les produits</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#inventoryModal"><i class="bi bi-clipboard-check me-2"></i> Inventaire physique</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-excel me-2"></i> Exporter l'inventaire</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- ====== STATISTIQUES PRINCIPALES ====== -->
+<div class="row g-3 mb-1">
+    <!-- Total produits -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-primary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Total produits</div>
+                        <div class="h3 mb-0 fw-bold text-primary">{{ total_produits }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-box-seam fs-2 text-primary opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-grid-3x3 me-1"></i>Articles différents en stock
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quantité totale -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Quantité totale</div>
+                        <div class="h3 mb-0 fw-bold text-success">{{ total_quantite }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-layers fs-2 text-success opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-box-arrow-in-down me-1"></i>Unités en inventaire
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stock critique -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-warning shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Stock critique</div>
+                        <div class="h3 mb-0 fw-bold text-warning">{{ stock_critique }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-exclamation-triangle fs-2 text-warning opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-shield-exclamation me-1"></i>Produits à réapprovisionner
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Valeur du stock -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-info shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Valeur estimée</div>
+                        <div class="h3 mb-0 fw-bold text-info">
+                            {% if valeur_totale %}
+                                {{ valeur_totale|floatformat:0 }} FCFA
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-cash-stack fs-2 text-info opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-calculator me-1"></i>Valeur au prix d'achat
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Colonne gauche : Tableau des stocks -->
+    <div class="">
+        <!-- Tableau des stocks -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-table me-2"></i>État des stocks
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Rechercher un produit..." id="searchInput">
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" onclick="filterStock('all')">
+                                Tous
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" onclick="filterStock('critique')">
+                                Critique
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onclick="filterStock('rupture')">
+                                Rupture
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="stockTable">
+                        <thead class="table-light">
+                            <tr> 
+                           
+                                <th class="ps-4">Produit</th>
+                                <th class="text-center">Stock actuel</th>
+                                <th class="text-center">Stock minimum</th>
+                                <th class="text-center">Différence</th>
+                                <th class="text-center">État</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in stocks %}
+                            <tr class="stock-row" data-stock-state="{{ s.produit.etat_stock }}">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <!-- <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-light text-dark me-3"
+                                             style="width:36px; height:36px;">
+                                            <i class="bi bi-box"></i>
+                                        </div> -->
+                                    
+                                        <div>
+                                           
+                                            <div class="fw-bold">{{ s.produit.nom }}</div>
+                                            <div class="text-muted extra-small">
+                                                <i class="bi bi-hash"></i> {{ s.produit.reference }}
+                                                {% if s.produit.categorie %}
+                                                • <i class="bi bi-tag"></i> {{ s.produit.categorie.nom }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold fs-5">{{ s.quantite }}</span>
+                                    <div class="extra-small text-muted">
+                                        unité{{ s.quantite|pluralize:"s" }}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-medium">{{ s.produit.stock_minimum }}</span>
+                                </td>
+                                <td class="text-center">
+                                    {% with diff=s.quantite|add:s.produit.stock_minimum %}
+                                        <span class="badge 
+                                            {% if s.quantite <= s.produit.stock_minimum %}bg-danger
+                                            {% elif s.quantite <= s.produit.stock_minimum|add:5 %}bg-warning
+                                            {% else %}bg-success{% endif %}">
+                                            {{ diff }} unité{{ diff|pluralize:"s" }}
+                                        </span>
+                                    {% endwith %}
+                                </td>
+                                <td class="text-center">
+                                    {% if s.quantite == 0 %}
+                                        <span class="badge bg-danger rounded-pill">
+                                            <i class="bi bi-x-octagon-fill me-1"></i>Rupture
+                                        </span>
+                                    {% elif s.quantite <= s.produit.stock_minimum %}
+                                        <span class="badge bg-warning rounded-pill">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Critique
+                                        </span>
+                                    {% elif s.quantite <= s.produit.stock_minimum|add:10 %}
+                                        <span class="badge bg-info rounded-pill">
+                                            <i class="bi bi-info-circle-fill me-1"></i>Faible
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-pill">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Normal
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'produit:produit_detail' s.produit.pk %}" 
+                                           class="btn btn-outline-info"
+                                           title="Détails produit"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-outline-success"
+                                                title="Ajouter du stock"
+                                                data-bs-toggle="tooltip"
+                                                onclick="ajouterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                        <button type="button" 
+                                                class="btn btn-outline-warning"
+                                                title="Ajuster le stock"
+                                                data-bs-toggle="tooltip"
+                                                onclick="ajusterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="text-muted mb-2">
+                                        <i class="bi bi-inboxes fs-1"></i>
+                                    </div>
+                                    <h5 class="text-muted">Aucun stock disponible</h5>
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Commencez par créer des produits et ajouter du stock
+                                    </p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        {{ stocks.count }} produit{{ stocks.count|pluralize }} en stock
+                        • 
+                        <span class="text-success">
+                            <i class="bi bi-check-circle"></i> {{ stock_normal }} normal{{ stock_normal|pluralize }}
+                        </span>
+                        • 
+                        <span class="text-warning">
+                            <i class="bi bi-exclamation-triangle"></i> {{ stock_critique }} critique{{ stock_critique|pluralize }}
+                        </span>
+                        • 
+                        <span class="text-danger">
+                            <i class="bi bi-x-circle"></i> {{ stock_rupture }} en rupture
+                        </span>
+                    </small>
+                    <a href="{% url 'mouvement_create' %}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Ajouter du stock
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Colonne droite : Alertes et actions rapides
+    <div class="col-lg-4">
+      
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bell me-2"></i>
+                    Alertes de stock
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stock_critique > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>{{ stock_critique }} produit{{ stock_critique|pluralize }} en stock critique</strong>
+                        <p class="mb-0 mt-2 small">
+                            Ces produits ont atteint ou dépassé leur seuil minimum.
+                        </p>
+                    </div>
+                {% endif %}
+                
+                {% if stock_rupture > 0 %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-octagon-fill me-2"></i>
+                        <strong>{{ stock_rupture }} produit{{ stock_rupture|pluralize }} en rupture de stock</strong>
+                        <p class="mb-0 mt-2 small">
+                            Ces produits sont épuisés et nécessitent un réapprovisionnement urgent.
+                        </p>
+                    </div>
+                {% endif %}
+                
+                {% if stock_critique == 0 and stock_rupture == 0 %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>État des stocks optimal</strong>
+                        <p class="mb-0 mt-2 small">
+                            Tous les produits sont en stock suffisant.
+                        </p>
+                    </div>
+                {% endif %}
+                
+               
+                <div class="mt-3">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-list-check me-2"></i>
+                        Produits à surveiller
+                    </h6>
+                    <div class="list-group list-group-flush">
+                        {% for s in stocks %}
+                            {% if s.quantite <= s.produit.stock_minimum %}
+                                <div class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-medium">{{ s.produit.nom|truncatechars:25 }}</div>
+                                            <div class="extra-small text-muted">
+                                                Stock: {{ s.quantite }} / Min: {{ s.produit.stock_minimum }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {% if s.quantite == 0 %}
+                                                <span class="badge bg-danger">Rupture</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Critique</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-check-circle fs-4 d-block mb-2"></i>
+                                Aucun produit en alerte
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    -->
+    
+        <!-- <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning-charge me-2"></i>
+                    Actions rapides
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'mouvement_create' %}?type=entree" 
+                       class="btn btn-success text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-plus-circle fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Entrée de stock</div>
+                                <small class="text-muted">Réception de marchandises</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'mouvement_create' %}?type=sortie" 
+                       class="btn btn-warning text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-dash-circle fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Sortie de stock</div>
+                                <small class="text-muted">Vente ou retrait</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" 
+                            class="btn btn-info text-start py-3"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#inventoryModal">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clipboard-check fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Inventaire physique</div>
+                                <small class="text-muted">Réconciliation des stocks</small>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <a href="{% url 'produit:produit_list' %}" 
+                       class="btn btn-outline-primary text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-box-seam fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Gérer les produits</div>
+                                <small class="text-muted">Catalogue complet</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>
+
+<!-- Modal inventaire physique -->
+<div class="modal fade" id="inventoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-clipboard-check me-2"></i>
+                    Inventaire physique
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Lancer un inventaire physique vous permet de vérifier la correspondance entre votre stock théorique et le stock réel.</p>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Conseil :</strong> Effectuez un inventaire physique régulièrement pour maintenir l'exactitude de vos stocks.
+                </div>
+                <div class="mb-3">
+                    <label for="inventoryDate" class="form-label">Date de l'inventaire</label>
+                    <input type="date" class="form-control" id="inventoryDate">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-primary">
+                    <i class="bi bi-play-circle me-1"></i> Démarrer l'inventaire
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+.extra-small {
+    font-size: 0.75rem;
+}
+.border-left-primary { border-left: 4px solid #0d6efd !important; }
+.border-left-success { border-left: 4px solid #198754 !important; }
+.border-left-warning { border-left: 4px solid #ffc107 !important; }
+.border-left-info { border-left: 4px solid #0dcaf0 !important; }
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Recherche dans le tableau
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#stockTable tbody tr.stock-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        });
+    }
+    
+    // Définir la date d'aujourd'hui pour l'inventaire
+    const today = new Date().toISOString().split('T')[0];
+    const inventoryDate = document.getElementById('inventoryDate');
+    if (inventoryDate) {
+        inventoryDate.value = today;
+        inventoryDate.min = today;
+    }
+});
+
+// Fonctions de filtrage
+function filterStock(state) {
+    const rows = document.querySelectorAll('#stockTable tbody tr.stock-row');
+    
+    rows.forEach(row => {
+        if (state === 'all') {
+            row.style.display = '';
+        } else {
+            const rowState = row.getAttribute('data-stock-state');
+            row.style.display = rowState === state ? '' : 'none';
+        }
+    });
+}
+
+// Fonctions pour les actions
+function ajouterStock(produitId, produitNom) {
+    // Rediriger vers la page d'ajout de stock avec le produit pré-sélectionné
+    window.location.href = `{% url 'mouvement_create' %}?produit=${produitId}&type=entree`;
+}
+
+function ajusterStock(produitId, produitNom) {
+    // Rediriger vers la page d'ajustement de stock
+    window.location.href = `{% url 'mouvement_create' %}?produit=${produitId}&type=ajustement`;
+}
+
+// Calculer les statistiques de stock
+function calculerStatistiques() {
+    const rows = document.querySelectorAll('#stockTable tbody tr.stock-row');
+    let normal = 0, critique = 0, rupture = 0;
+    
+    rows.forEach(row => {
+        const state = row.getAttribute('data-stock-state');
+        if (state === 'normal') normal++;
+        else if (state === 'critique') critique++;
+        else if (state === 'rupture') rupture++;
+    });
+    
+    console.log(`Normal: ${normal}, Critique: ${critique}, Rupture: ${rupture}`);
+}
+</script>
+
+{% endblock %}

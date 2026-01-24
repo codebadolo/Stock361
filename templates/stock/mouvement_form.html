@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nouveau mouvement{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'stock_list' %}"><i class="bi bi-box"></i> Stock</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'mouvement_list' %}"><i class="bi bi-arrow-left-right"></i> Mouvements</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-plus-circle"></i> Nouveau</li>
+    </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 mb-0 text-gray-800">
+            <i class="bi bi-plus-circle text-primary me-2"></i>Nouveau mouvement
+        </h2>
+        <p class="text-muted mb-0">Ajouter une entrée, sortie ou ajustement de stock</p>
+    </div>
+    <a href="{% url 'mouvement_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Retour
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow">
+            <div class="card-body p-4">
+                <form method="post" id="mouvement-form">
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <!-- Produit -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-box me-1"></i>Produit
+                            </label>
+                            {{ form.produit }}
+                            {% if form.produit.errors %}
+                                <div class="text-danger small mt-1">{{ form.produit.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Type de mouvement -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-tag me-1"></i>Type de mouvement
+                            </label>
+                            {{ form.type_mouvement }}
+                            {% if form.type_mouvement.errors %}
+                                <div class="text-danger small mt-1">{{ form.type_mouvement.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Quantité -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-hash me-1"></i>Quantité
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box-arrow-in-down" id="quantite-icon"></i>
+                                </span>
+                                {{ form.quantite }}
+                            </div>
+                            {% if form.quantite.errors %}
+                                <div class="text-danger small mt-1">{{ form.quantite.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Stock actuel (lecture seule) -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-info-circle me-1"></i>Stock actuel
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box"></i>
+                                </span>
+                                <input type="text" class="form-control" id="stock-actuel" value="-" readonly>
+                            </div>
+                            <small class="text-muted">Sera mis à jour automatiquement</small>
+                        </div>
+                        
+                        <!-- Commentaire -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text me-1"></i>Commentaire (optionnel)
+                            </label>
+                            {{ form.commentaire }}
+                            {% if form.commentaire.errors %}
+                                <div class="text-danger small mt-1">{{ form.commentaire.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                        <div>
+                            <a href="{% url 'mouvement_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Annuler
+                            </a>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" name="save_and_new" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Enregistrer et nouveau
+                            </button>
+                            <button type="submit" name="save_and_list" class="btn btn-success">
+                                <i class="bi bi-check-circle me-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Aide contextuelle -->
+        <div class="card border-0 shadow mt-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-info-circle text-primary me-2"></i>Guide rapide
+                </h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <span class="badge bg-success p-2">
+                                    <i class="bi bi-arrow-down-circle fs-5"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Entrée</strong>
+                                <p class="text-muted small mb-0">Ajoute des produits au stock</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <span class="badge bg-danger p-2">
+                                    <i class="bi bi-arrow-up-circle fs-5"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Sortie</strong>
+                                <p class="text-muted small mb-0">Retire des produits du stock</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <span class="badge bg-warning p-2">
+                                    <i class="bi bi-sliders fs-5"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Ajustement</strong>
+                                <p class="text-muted small mb-0">Corrige le stock physique</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .card {
+        border-radius: 12px;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+    
+    .btn-group .btn:first-child {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    
+    .btn-group .btn:last-child {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    
+    /* Style pour les erreurs de formulaire */
+    .errorlist {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    /* Animation pour le changement de type */
+    .type-animation {
+        transition: all 0.3s ease;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer les éléments
+    const produitSelect = document.querySelector('select[name="produit"]');
+    const typeSelect = document.querySelector('select[name="type_mouvement"]');
+    const quantiteIcon = document.getElementById('quantite-icon');
+    const stockActuelField = document.getElementById('stock-actuel');
+    
+    // Stock des produits (sera rempli par AJAX)
+    let produitsStock = {};
+    
+    // Charger le stock des produits
+    function chargerStockProduits() {
+        fetch('')  // Vous devrez créer cette vue API
+            .then(response => response.json())
+            .then(data => {
+                produitsStock = data;
+                if (produitSelect.value) {
+                    majStockActuel(produitSelect.value);
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+    
+    // Mettre à jour le stock actuel
+    function majStockActuel(produitId) {
+        if (produitsStock[produitId]) {
+            stockActuelField.value = produitsStock[produitId];
+        } else {
+            stockActuelField.value = '-';
+        }
+    }
+    
+    // Mettre à jour l'icône selon le type de mouvement
+    function majIconeType(type) {
+        const icons = {
+            'entree': 'bi-box-arrow-in-down',
+            'sortie': 'bi-box-arrow-up',
+            'ajustement': 'bi-sliders'
+        };
+        
+        if (icons[type]) {
+            quantiteIcon.className = `bi ${icons[type]}`;
+        }
+    }
+    
+    // Écouter les changements de produit
+    if (produitSelect) {
+        produitSelect.addEventListener('change', function() {
+            majStockActuel(this.value);
+        });
+    }
+    
+    // Écouter les changements de type
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            majIconeType(this.value);
+        });
+        
+        // Initialiser l'icône
+        if (typeSelect.value) {
+            majIconeType(typeSelect.value);
+        }
+    }
+    
+    // Validation simple du formulaire
+    const form = document.getElementById('mouvement-form');
+    form.addEventListener('submit', function(e) {
+        const quantite = document.querySelector('input[name="quantite"]').value;
+        const type = typeSelect.value;
+        
+        // Valider que la quantité est positive
+        if (parseInt(quantite) <= 0) {
+            e.preventDefault();
+            alert('La quantité doit être supérieure à 0');
+            return false;
+        }
+        
+        // Pour les sorties, vérifier que le stock est suffisant
+        if (type === 'sortie' && produitSelect.value) {
+            const stockActuel = parseInt(stockActuelField.value) || 0;
+            if (parseInt(quantite) > stockActuel) {
+                e.preventDefault();
+                alert(`Stock insuffisant ! Stock actuel: ${stockActuel}`);
+                return false;
+            }
+        }
+    });
+    
+    // Initialiser les sélecteurs avec Select2 si disponible
+    if (typeof $.fn.select2 !== 'undefined') {
+        $('select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Sélectionner...'
+        });
+    }
+    
+    // Charger les données initiales
+    chargerStockProduits();
+});
+</script>
+
+<!-- CSS supplémentaire pour les icônes -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+
+{% endblock %}

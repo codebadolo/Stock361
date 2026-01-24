@@ -1,0 +1,701 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{% if form.instance.pk %}Modifier {{ form.instance.get_full_name }}{% else %}Nouvel utilisateur{% endif %}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'utilisateur_list' %}"><i class="bi bi-people"></i> Utilisateurs</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% if form.instance.pk %}
+                <i class="bi bi-pencil-square"></i> Modifier
+            {% else %}
+                <i class="bi bi-person-plus"></i> Nouveau
+            {% endif %}
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">
+            {% if form.instance.pk %}
+                <i class="bi bi-person-gear me-2"></i>Modifier {{ form.instance.get_full_name }}
+            {% else %}
+                <i class="bi bi-person-plus me-2"></i>Nouvel utilisateur
+            {% endif %}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if form.instance.pk %}
+                Mettez à jour les informations et permissions de l'utilisateur
+            {% else %}
+                Créez un nouveau compte utilisateur avec les permissions appropriées
+            {% endif %}
+        </p>
+    </div>
+    <a href="{% url 'utilisateur_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Carte principale du formulaire -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-badge me-2"></i>
+                    Informations de l'utilisateur
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="utilisateurForm">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Section 1 : Identité -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-person-circle me-2"></i>
+                            Identité
+                        </h6>
+                        
+                        <!-- Prénom -->
+                        <div class="mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                <i class="bi bi-person me-1"></i>
+                                Prénom *
+                            </label>
+                            {% render_field form.first_name class="form-control" placeholder="Entrez le prénom" %}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.first_name.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Nom -->
+                        <div class="mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                <i class="bi bi-person me-1"></i>
+                                Nom *
+                            </label>
+                            {% render_field form.last_name class="form-control" placeholder="Entrez le nom de famille" %}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.last_name.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2 : Authentification -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-shield-lock me-2"></i>
+                            Authentification
+                        </h6>
+                        
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                <i class="bi bi-person-badge me-1"></i>
+                                Nom d'utilisateur *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-at"></i>
+                                </span>
+                                {% render_field form.username class="form-control" placeholder="Choisissez un nom dutilisateur" %}
+                            </div>
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.username.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Utilisé pour se connecter au système
+                            </div>
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="bi bi-envelope me-1"></i>
+                                Adresse email *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-mailbox"></i>
+                                </span>
+                                {% render_field form.email class="form-control" placeholder="exemple@domain.com" type="email" %}
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.email.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Pour les communications et la récupération de compte
+                            </div>
+                        </div>
+                        
+                        <!-- Mot de passe (si création) -->
+                        {% if not form.instance.pk %}
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-key me-1"></i>
+                                Mot de passe *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" name="password1" class="form-control" 
+                                       placeholder="Créez un mot de passe sécurisé" required>
+                            </div>
+                            <div class="form-text">
+                                Minimum 8 caractères, avec chiffres et lettres
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-key-fill me-1"></i>
+                                Confirmation du mot de passe *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input type="password" name="password2" class="form-control" 
+                                       placeholder="Confirmez le mot de passe" required>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Section 3 : Affectation -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-building me-2"></i>
+                            Affectation
+                        </h6>
+                        
+                        <!-- Entreprise -->
+                        <div class="mb-3">
+                            <label for="{{ form.entreprise.id_for_label }}" class="form-label">
+                                <i class="bi bi-buildings me-1"></i>
+                                Entreprise *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-briefcase"></i>
+                                </span>
+                                {% render_field form.entreprise class="form-select" %}
+                            </div>
+                            {% if form.entreprise.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.entreprise.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Sélectionnez l'entreprise à laquelle l'utilisateur appartient
+                            </div>
+                        </div>
+                        
+                        <!-- Type d'utilisateur -->
+                        <div class="mb-3">
+                            <label for="{{ form.type_utilisateur.id_for_label }}" class="form-label">
+                                <i class="bi bi-person-badge me-1"></i>
+                                Rôle *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-award"></i>
+                                </span>
+                                {% render_field form.type_utilisateur class="form-select" %}
+                            </div>
+                            {% if form.type_utilisateur.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.type_utilisateur.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Définit les permissions de l'utilisateur dans le système
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 4 : Informations complémentaires -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-telephone me-2"></i>
+                            Contact
+                        </h6>
+                        
+                        <!-- Téléphone -->
+                        {% if form.telephone %}
+                        <div class="mb-3">
+                            <label for="{{ form.telephone.id_for_label }}" class="form-label">
+                                <i class="bi bi-phone me-1"></i>
+                                Téléphone
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-telephone-outbound"></i>
+                                </span>
+                                {% render_field form.telephone class="form-control" placeholder="+229 XX XX XX XX" %}
+                            </div>
+                            {% if form.telephone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.telephone.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Adresse -->
+                        {% if form.adresse %}
+                        <div class="mb-3">
+                            <label for="{{ form.adresse.id_for_label }}" class="form-label">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                Adresse
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-house-door"></i>
+                                </span>
+                                {% render_field form.adresse class="form-control" placeholder="Adresse complète" %}
+                            </div>
+                            {% if form.adresse.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.adresse.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Section 5 : Statut -->
+                    {% if form.est_actif %}
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            Statut
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {% render_field form.est_actif class="form-check-input" role="switch" %}
+                                <label class="form-check-label" for="{{ form.est_actif.id_for_label }}">
+                                    <i class="bi bi-toggle-on me-1"></i>
+                                    Compte actif
+                                </label>
+                            </div>
+                            {% if form.est_actif.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.est_actif.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Désactivez pour suspendre l'accès de l'utilisateur
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Boutons d'action -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'utilisateur_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Annuler
+                        </a>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    <i class="bi bi-check-circle me-1"></i> Mettre à jour
+                                {% else %}
+                                    <i class="bi bi-person-plus me-1"></i> Créer l'utilisateur
+                                {% endif %}
+                            </button>
+                            {% if form.instance.pk %}
+                            <a href="{% url 'utilisateur_detail' form.instance.pk %}" class="btn btn-outline-info">
+                                <i class="bi bi-eye me-1"></i> Voir profil
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Colonne droite : Informations et aperçu -->
+    <div class="col-lg-4">
+        <!-- Carte d'information sur les rôles -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Informations sur les rôles
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-shield-check text-danger me-2"></i>
+                        Super Admin
+                    </h6>
+                    <p class="small text-muted mb-2">
+                        Accès complet au système, gestion de toutes les entreprises et utilisateurs.
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-person-badge text-warning me-2"></i>
+                        Responsable
+                    </h6>
+                    <p class="small text-muted mb-2">
+                        Gestion complète de son entreprise, création de gérants/secrétaires.
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-person-gear text-info me-2"></i>
+                        Gérant/Secrétaire
+                    </h6>
+                    <p class="small text-muted">
+                        Gestion quotidienne des opérations, pas de création d'autres utilisateurs.
+                    </p>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Important</strong>
+                    <p class="mb-0 mt-2 small">
+                        Attribuez les rôles avec précaution selon les besoins de chaque utilisateur.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte d'aperçu -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-eye me-2"></i>
+                    Aperçu du profil
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3
+                                {% if form.instance.est_super_admin %}bg-danger text-white
+                                {% elif form.instance.est_responsable %}bg-warning text-white
+                                {% else %}bg-info text-white{% endif %}"
+                         style="width: 80px; height: 80px; font-size: 24px;"
+                         id="avatarPreview">
+                        {{ form.instance.get_full_name|first|default:"?"|upper }}
+                    </div>
+                    
+                    <h6 id="previewName" class="fw-bold mb-1">
+                        {% if form.instance.get_full_name %}
+                            {{ form.instance.get_full_name }}
+                        {% else %}
+                            Prénom Nom
+                        {% endif %}
+                    </h6>
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-at"></i>
+                        <span id="previewUsername">
+                            {% if form.instance.username %}
+                                {{ form.instance.username }}
+                            {% else %}
+                                username
+                            {% endif %}
+                        </span>
+                    </p>
+                    
+                    <div class="mb-3">
+                        <span class="badge 
+                            {% if form.instance.est_super_admin %}bg-danger
+                            {% elif form.instance.est_responsable %}bg-warning
+                            {% else %}bg-info{% endif %}"
+                              id="previewRole">
+                            <i class="bi 
+                                {% if form.instance.est_super_admin %}bi-shield-check
+                                {% elif form.instance.est_responsable %}bi-person-badge
+                                {% else %}bi-person-gear{% endif %} me-1"></i>
+                            {{ form.instance.get_type_utilisateur_display|default:"Rôle" }}
+                        </span>
+                    </div>
+                    
+                    <div class="text-start small">
+                        <div class="mb-2">
+                            <i class="bi bi-building text-muted me-2"></i>
+                            <span id="previewEntreprise">
+                                {% if form.instance.entreprise %}
+                                    {{ form.instance.entreprise.nom }}
+                                {% else %}
+                                    Entreprise
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <i class="bi bi-envelope text-muted me-2"></i>
+                            <span id="previewEmail">
+                                {% if form.instance.email %}
+                                    {{ form.instance.email|truncatechars:20 }}
+                                {% else %}
+                                    email@exemple.com
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <i class="bi bi-toggle-on text-muted me-2"></i>
+                            <span id="previewStatus">
+                                {% if form.instance.est_actif or not form.instance.pk %}
+                                    <span class="text-success">Compte actif</span>
+                                {% else %}
+                                    <span class="text-danger">Compte inactif</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+.form-switch .form-check-input {
+    height: 1.5em;
+    width: 3em;
+}
+.form-switch .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.invalid-feedback {
+    display: block;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise à jour en temps réel de l'aperçu
+    const firstNameInput = document.querySelector('#{{ form.first_name.id_for_label }}');
+    const lastNameInput = document.querySelector('#{{ form.last_name.id_for_label }}');
+    const usernameInput = document.querySelector('#{{ form.username.id_for_label }}');
+    const emailInput = document.querySelector('#{{ form.email.id_for_label }}');
+    const entrepriseSelect = document.querySelector('#{{ form.entreprise.id_for_label }}');
+    const roleSelect = document.querySelector('#{{ form.type_utilisateur.id_for_label }}');
+    const activeSwitch = document.querySelector('#{{ form.est_actif.id_for_label }}');
+    
+    // Mettre à jour le nom complet
+    function updateFullName() {
+        const firstName = firstNameInput ? firstNameInput.value.trim() : '';
+        const lastName = lastNameInput ? lastNameInput.value.trim() : '';
+        const previewName = document.getElementById('previewName');
+        const avatarPreview = document.getElementById('avatarPreview');
+        
+        let fullName = '';
+        if (firstName && lastName) {
+            fullName = firstName + ' ' + lastName;
+        } else if (firstName) {
+            fullName = firstName;
+        } else if (lastName) {
+            fullName = lastName;
+        } else {
+            fullName = 'Prénom Nom';
+        }
+        
+        previewName.textContent = fullName;
+        
+        // Mettre à jour l'avatar
+        const initial = fullName.charAt(0).toUpperCase();
+        avatarPreview.textContent = initial || '?';
+    }
+    
+    if (firstNameInput) {
+        firstNameInput.addEventListener('input', updateFullName);
+    }
+    if (lastNameInput) {
+        lastNameInput.addEventListener('input', updateFullName);
+    }
+    
+    // Mettre à jour le username
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            const previewUsername = document.getElementById('previewUsername');
+            previewUsername.textContent = this.value || 'username';
+        });
+    }
+    
+    // Mettre à jour l'email
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const previewEmail = document.getElementById('previewEmail');
+            previewEmail.textContent = this.value ? this.value.substring(0, 20) + (this.value.length > 20 ? '...' : '') : 'email@exemple.com';
+        });
+    }
+    
+    // Mettre à jour l'entreprise
+    if (entrepriseSelect) {
+        entrepriseSelect.addEventListener('change', function() {
+            const previewEntreprise = document.getElementById('previewEntreprise');
+            const selectedOption = this.options[this.selectedIndex];
+            previewEntreprise.textContent = selectedOption.text || 'Entreprise';
+        });
+    }
+    
+    // Mettre à jour le rôle et l'avatar
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            const previewRole = document.getElementById('previewRole');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const selectedValue = this.value;
+            
+            // Mettre à jour le badge de rôle
+            let roleText = '';
+            let roleClass = '';
+            let roleIcon = '';
+            
+            switch(selectedValue) {
+                case 'super_admin':
+                    roleText = 'Super Admin';
+                    roleClass = 'bg-danger';
+                    roleIcon = 'bi-shield-check';
+                    avatarPreview.className = avatarPreview.className.replace(/bg-(danger|warning|info)/, 'bg-danger');
+                    break;
+                case 'responsable':
+                    roleText = 'Responsable';
+                    roleClass = 'bg-warning';
+                    roleIcon = 'bi-person-badge';
+                    avatarPreview.className = avatarPreview.className.replace(/bg-(danger|warning|info)/, 'bg-warning');
+                    break;
+                case 'gerant':
+                default:
+                    roleText = 'Gérant/Secrétaire';
+                    roleClass = 'bg-info';
+                    roleIcon = 'bi-person-gear';
+                    avatarPreview.className = avatarPreview.className.replace(/bg-(danger|warning|info)/, 'bg-info');
+                    break;
+            }
+            
+            previewRole.className = `badge ${roleClass}`;
+            previewRole.innerHTML = `<i class="bi ${roleIcon} me-1"></i>${roleText}`;
+        });
+    }
+    
+    // Mettre à jour le statut
+    if (activeSwitch) {
+        activeSwitch.addEventListener('change', function() {
+            const previewStatus = document.getElementById('previewStatus');
+            if (this.checked) {
+                previewStatus.innerHTML = '<span class="text-success">Compte actif</span>';
+            } else {
+                previewStatus.innerHTML = '<span class="text-danger">Compte inactif</span>';
+            }
+        });
+    }
+    
+    // Validation du formulaire
+    const form = document.getElementById('utilisateurForm');
+    form.addEventListener('submit', function(e) {
+        const firstName = firstNameInput ? firstNameInput.value.trim() : '';
+        const lastName = lastNameInput ? lastNameInput.value.trim() : '';
+        const username = usernameInput ? usernameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+        
+        if (!firstName) {
+            e.preventDefault();
+            alert('Le prénom est obligatoire');
+            firstNameInput.focus();
+            return false;
+        }
+        
+        if (!lastName) {
+            e.preventDefault();
+            alert('Le nom est obligatoire');
+            lastNameInput.focus();
+            return false;
+        }
+        
+        if (!username) {
+            e.preventDefault();
+            alert('Le nom d\'utilisateur est obligatoire');
+            usernameInput.focus();
+            return false;
+        }
+        
+        if (!email) {
+            e.preventDefault();
+            alert('L\'email est obligatoire');
+            emailInput.focus();
+            return false;
+        }
+        
+        // Validation basique d'email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            alert('Veuillez entrer une adresse email valide');
+            emailInput.focus();
+            return false;
+        }
+    });
+});
+</script>
+
+{% endblock %}

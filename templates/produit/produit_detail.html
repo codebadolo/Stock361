@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% block title %}Détail - {{ produit.nom }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'produit:produit_list' %}"><i class="bi bi-box-seam"></i> Produits</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-info-circle"></i> {{ produit.nom|truncatechars:30 }}
+        </li>
+    </ol>
+</nav>
+
+<div class="row">
+    <!-- Colonne gauche : Informations principales -->
+    <div class="col-lg-8 mb-4">
+        <!-- Carte principale du produit -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-box-seam me-2"></i>Détails du produit
+                        </h5>
+                        <p class="text-muted mb-0 small">
+                            <i class="bi bi-hash me-1"></i>Réf: {{ produit.reference }}
+                            {% if produit.code_barre %}
+                            • <i class="bi bi-upc-scan me-1"></i> {{ produit.code_barre }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <span class="badge 
+                        {% if produit.etat_stock == 'rupture' %}bg-danger
+                        {% elif produit.etat_stock == 'critique' %}bg-warning
+                        {% else %}bg-success{% endif %} fs-6">
+                        <i class="bi 
+                            {% if produit.etat_stock == 'rupture' %}bi-x-octagon-fill
+                            {% elif produit.etat_stock == 'critique' %}bi-exclamation-triangle-fill
+                            {% else %}bi-check-circle-fill{% endif %} me-1"></i>
+                        {{ produit.etat_stock|title }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Image du produit -->
+                    <div class="col-md-5 text-center mb-4 mb-md-0">
+                        <div class="product-image-container border rounded p-3 mb-3 bg-light">
+                            {% if produit.image %}
+                                <img src="{{ produit.image.url }}" 
+                                     alt="{{ produit.nom }}" 
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-height: 300px; object-fit: contain;">
+                            {% else %}
+                                <div class="d-flex flex-column align-items-center justify-content-center"
+                                     style="height: 300px;">
+                                    <i class="bi bi-box-seam display-4 text-muted mb-3"></i>
+                                    <p class="text-muted">Aucune image disponible</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions rapides image -->
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary">
+                                <i class="bi bi-arrows-fullscreen"></i> Agrandir
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> Télécharger
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Informations détaillées -->
+                    <div class="col-md-7">
+                        <h3 class="fw-bold mb-3">{{ produit.nom }}</h3>
+                        
+                        <!-- Prix et Stock -->
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <div class="text-muted small mb-2">
+                                            <i class="bi bi-cash-coin"></i> Prix Détail
+                                        </div>
+                                        <div class="h4 fw-bold text-primary mb-0">
+                                            {{ produit.prix_vente_detail|floatformat:0|default:"0" }} FCFA
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            Prix unitaire
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <div class="text-muted small mb-2">
+                                            <i class="bi bi-cart-check"></i> Prix Gros
+                                        </div>
+                                        <div class="h4 fw-bold text-success mb-0">
+                                            {{ produit.prix_vente_gros|floatformat:0|default:"0" }} FCFA
+                                        </div>
+                                        <div class="small text-muted mt-1">
+                                            {% if produit.prix_vente_detail and produit.prix_vente_gros %}
+                                                {% widthratio produit.prix_vente_gros produit.prix_vente_detail 100 as ratio %}
+                                                <i class="bi bi-percent"></i> {{ ratio|floatformat:0 }}% du détail
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informations essentielles -->
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-container bg-primary bg-opacity-10 rounded p-2 me-3">
+                                        <i class="bi bi-box text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Stock Actuel</div>
+                                        <div class="h4 fw-bold mb-0">{{ produit.quantite_stock|default:"0" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-container bg-warning bg-opacity-10 rounded p-2 me-3">
+                                        <i class="bi bi-shield-exclamation text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Stock Minimum</div>
+                                        <div class="h4 fw-bold mb-0">{{ produit.stock_minimum|default:"0" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-container bg-info bg-opacity-10 rounded p-2 me-3">
+                                        <i class="bi bi-tag text-info"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Catégorie</div>
+                                        <div class="fw-medium">
+                                            {% if produit.categorie %}
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                                    {{ produit.categorie.nom }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">Non catégorisé</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-6 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-container bg-success bg-opacity-10 rounded p-2 me-3">
+                                        <i class="bi bi-building text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small">Entreprise</div>
+                                        <div class="fw-medium">
+                                            {% if produit.entreprise %}
+                                                <a href="{% url 'entreprise_detail' produit.entreprise.id %}" 
+                                                   class="text-decoration-none">
+                                                    {{ produit.entreprise.nom }}
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">Non assigné</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="border-top pt-4 mt-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-card-text me-2"></i>Description
+                    </h6>
+                    <div class="bg-light p-3 rounded">
+                        {% if produit.description %}
+                            <p class="mb-0">{{ produit.description }}</p>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Aucune description disponible pour ce produit.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Informations supplémentaires -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-clock-history me-2"></i>Historique
+                                </h6>
+                                <div class="small">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Date de création</span>
+                                        <span class="fw-medium">{{ produit.date_creation|date:"d/m/Y" }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Dernière modification</span>
+                                        <span class="fw-medium">
+                                            {% if produit.date_modification %}
+                                                {{ produit.date_modification|date:"d/m/Y H:i" }}
+                                            {% else %}
+                                                Non modifié
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>Statistiques
+                                </h6>
+                                <div class="small">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Ventes totales</span>
+                                        <span class="fw-medium">-</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Stock idéal</span>
+                                        <span class="fw-medium">
+                                            {% if produit.quantite_stock > produit.stock_minimum %}
+                                                <span class="text-success">✓ Suffisant</span>
+                                            {% else %}
+                                                <span class="text-warning">! Insuffisant</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section mouvements de stock (optionnelle) -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-arrow-left-right me-2"></i>Derniers mouvements
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-clock-history fs-1 mb-2 d-block"></i>
+                    <p class="mb-0">Aucun mouvement de stock récent</p>
+                    <small>Les mouvements de stock apparaîtront ici</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Colonne droite : Actions et statistiques -->
+    <div class="col-lg-4 mb-4">
+        <!-- Carte actions rapides -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning-charge me-2"></i>Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'produit:produit_update_modal' produit.pk %}" 
+                       class="btn btn-primary text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-pencil-square fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Modifier le produit</div>
+                                <small class="text-muted">Mettre à jour les informations</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" class="btn btn-success text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-plus-circle fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Ajouter au stock</div>
+                                <small class="text-muted">Réapprovisionner</small>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="btn btn-warning text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-arrow-down-circle fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Ajuster le stock</div>
+                                <small class="text-muted">Corriger l'inventaire</small>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <a href="{% url 'produit:produit_list' %}" 
+                       class="btn btn-outline-secondary text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-arrow-left fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Retour à la liste</div>
+                                <small class="text-muted">Voir tous les produits</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" class="btn btn-outline-danger text-start py-3"
+                            onclick="showDeleteConfirmation()">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-trash fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Supprimer le produit</div>
+                                <small class="text-muted">Action irréversible</small>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte état du stock -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up me-2"></i>État du Stock
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    {% with ratio=produit.quantite_stock|default:0 min=produit.stock_minimum|default:1 %}
+                        {% if ratio > min %}
+                            {% widthratio ratio min 100 as pourcentage %}
+                        {% else %}
+                            {% widthratio ratio min 100 as pourcentage %}
+                        {% endif %}
+                        
+                        <div class="position-relative d-inline-block mb-3">
+                            <div class="circular-progress" 
+                                 data-percent="{{ pourcentage|default:'0' }}"
+                                 data-color="{% if produit.etat_stock == 'rupture' %}#dc3545{% elif produit.etat_stock == 'critique' %}#ffc107{% else %}#198754{% endif %}">
+                            </div>
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <div class="h4 fw-bold mb-0">{{ pourcentage|default:'0' }}%</div>
+                                <div class="extra-small text-muted">du minimum</div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Stock actuel</span>
+                        <span class="fw-bold">{{ produit.quantite_stock|default:"0" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Stock minimum</span>
+                        <span class="fw-bold">{{ produit.stock_minimum|default:"0" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Différence</span>
+                        <span class="fw-bold 
+                            {% if produit.quantite_stock > produit.stock_minimum %}text-success
+                            {% else %}text-danger{% endif %}">
+                            {{ produit.quantite_stock|default:0|add:produit.stock_minimum|default:0|floatformat:0 }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="alert 
+                    {% if produit.etat_stock == 'rupture' %}alert-danger
+                    {% elif produit.etat_stock == 'critique' %}alert-warning
+                    {% else %}alert-success{% endif %} py-2 mb-0">
+                    <i class="bi 
+                        {% if produit.etat_stock == 'rupture' %}bi-x-octagon-fill
+                        {% elif produit.etat_stock == 'critique' %}bi-exclamation-triangle-fill
+                        {% else %}bi-check-circle-fill{% endif %} me-2"></i>
+                    Stock {{ produit.etat_stock }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Carte informations rapides -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Informations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Créé le</span>
+                        <span>{{ produit.date_creation|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">ID Produit</span>
+                        <span class="fw-medium">#{{ produit.id }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Disponibilité</span>
+                        <span>
+                            {% if produit.est_actif %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon me-2"></i>
+                    <strong>Attention !</strong> Cette action est irréversible.
+                </div>
+                <p>Êtes-vous sûr de vouloir supprimer le produit <strong>{{ produit.nom }}</strong> ?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-box-seam me-2"></i>
+                    <strong>Impact :</strong> Toutes les références à ce produit seront conservées mais marquées comme "produit supprimé".
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <form action="{% url 'produit:produit_delete_modal' produit.pk %}" method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Supprimer définitivement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.icon-container {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-image-container {
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.extra-small {
+    font-size: 0.75rem;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.circular-progress {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--progress-color) calc(var(--progress-percent) * 1%),
+        #f0f0f0 0%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.circular-progress::before {
+    content: '';
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background: white;
+    border-radius: 50%;
+}
+</style>
+
+<script>
+function showDeleteConfirmation() {
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+
+// Initialiser la jauge circulaire
+document.addEventListener('DOMContentLoaded', function() {
+    const progressElement = document.querySelector('.circular-progress');
+    if (progressElement) {
+        const percent = progressElement.getAttribute('data-percent');
+        const color = progressElement.getAttribute('data-color');
+        
+        progressElement.style.setProperty('--progress-percent', percent);
+        progressElement.style.setProperty('--progress-color', color);
+    }
+    
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+{% endblock %}

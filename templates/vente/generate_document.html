@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Générer un document - Vente #{{ vente.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>
+                        Générer un document
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Choisissez le type de document à générer pour la vente #{{ vente.id }}
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="doc_type" 
+                                       id="receipt" value="receipt" checked>
+                                <label class="form-check-label" for="receipt">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-receipt text-primary fs-1"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Reçu de vente</h6>
+                                            <p class="text-muted small mb-0">
+                                                Document simple pour preuve d'achat
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="doc_type" 
+                                       id="invoice" value="invoice">
+                                <label class="form-check-label" for="invoice">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <i class="bi bi-file-text text-success fs-1"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Facture officielle</h6>
+                                            <p class="text-muted small mb-0">
+                                                Document formel avec conditions de paiement et signatures
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Le document sera sauvegardé dans le système et pourra être 
+                            téléchargé ou imprimé ultérieurement.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'vente_detail' vente.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Générer le document
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow">
+                <div class="card-body">
+                    <h6 class="mb-3">Informations de la vente</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <strong>N° Vente:</strong> #{{ vente.id }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Date:</strong> {{ vente.date|date:"d/m/Y H:i" }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Client:</strong> {{ vente.client.nom|default:"Comptant" }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Total:</strong> {{ vente.total|floatformat:0 }} FCFA
+                        </li>
+                        <li>
+                            <strong>Articles:</strong> {{ vente.lignes.count }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

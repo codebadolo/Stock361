@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Nouvel approvisionnement{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="{% url 'approvisionnement_list' %}">Approvisionnements</a>
+  <span class="breadcrumb-item active">Nouveau</span>
+</nav>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header">
+    <h5>Nouvel approvisionnement</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">{{ form.fournisseur.label_tag }}{{ form.fournisseur }}</div>
+        <div class="col-md-6">{{ form.produit.label_tag }}{{ form.produit }}</div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6">{{ form.quantite.label_tag }}{{ form.quantite }}</div>
+        <div class="col-md-6">{{ form.prix_achat.label_tag }}{{ form.prix_achat }}</div>
+      </div>
+      <div class="text-end mt-3">
+        <a href="{% url 'approvisionnement_list' %}" class="btn btn-secondary">Annuler</a>
+        <button class="btn btn-success">Valider</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

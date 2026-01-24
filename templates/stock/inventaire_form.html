@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Nouvel Inventaire{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}" class="text-decoration-none">
+                <i class="bi bi-house-door me-1"></i>Accueil
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'inventaire_list' %}" class="text-decoration-none">
+                <i class="bi bi-clipboard-check me-1"></i>Inventaires
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="bi bi-plus-circle me-1"></i>Nouvel inventaire
+        </li>
+    </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-plus-circle text-primary me-2"></i>Nouvel inventaire
+        </h1>
+        <p class="text-muted mb-0">Créez une nouvelle vérification de stock</p>
+    </div>
+    <div>
+        <a href="{% url 'inventaire_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Retour
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-pencil me-2"></i>Paramètres de l'inventaire
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Commentaire (optionnel)</label>
+                        <textarea name="commentaire" class="form-control" rows="3" 
+                                  placeholder="Motif de l'inventaire (ex: Inventaire de fin d'année, vérification trimestrielle...)"></textarea>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i>Ce commentaire aidera à identifier l'inventaire plus tard
+                        </div>
+                    </div>
+                    
+                    <!-- Informations -->
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle fs-4 me-3"></i>
+                            <div>
+                                <h6 class="alert-heading mb-2">À propos de cet inventaire</h6>
+                                <ul class="mb-0 small">
+                                    <li>Cet inventaire concernera <strong>{{ produits_count }}</strong> produits</li>
+                                    <li>Le stock théorique actuel sera pré-rempli</li>
+                                    <li>Vous pourrez ensuite saisir les quantités physiquement comptées</li>
+                                    <li>Les écarts seront automatiquement corrigés après validation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div>
+                            <a href="{% url 'inventaire_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Annuler
+                            </a>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Créer l'inventaire
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Aide -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-question-circle text-primary me-2"></i>Comment fonctionne un inventaire ?
+                </h6>
+            </div>
+            <div class="card-body">
+                <ol class="small mb-0">
+                    <li class="mb-2"><strong>Création :</strong> Génère une liste de tous les produits avec leur stock théorique</li>
+                    <li class="mb-2"><strong>Comptage :</strong> Comptez physiquement chaque produit dans votre stock</li>
+                    <li class="mb-2"><strong>Saisie :</strong> Entrez les quantités réellement comptées</li>
+                    <li class="mb-2"><strong>Validation :</strong> Les écarts sont automatiquement corrigés</li>
+                    <li><strong>Rapport :</strong> Obtenez un rapport détaillé des ajustements effectués</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Statistiques rapides -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">
+                    <i class="bi bi-bar-chart text-primary me-2"></i>Aperçu du stock
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="text-muted small">Produits</div>
+                        <div class="h5 mb-0">{{ produits_count }}</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="text-muted small">Stock total</div>
+                        <div class="h5 mb-0">{{ stock_total }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">Stock critique</div>
+                        <div class="h5 mb-0 text-danger">{{ stock_critique }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-muted small">En rupture</div>
+                        <div class="h5 mb-0 text-danger">{{ stock_zero }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    .alert ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .row > div {
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>
+
+{% endblock %}

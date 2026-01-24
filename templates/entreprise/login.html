@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock361 - Connexion</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #084298;
+            --accent-color: #20c997;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --input-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+   
+        
+
+        
+        .login-container {
+            width: 100%;
+        
+            margin: 0 auto;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 24px;
+     
+            box-shadow: var(--card-shadow);
+            display: flex;
+            
+            max-height: 100vh;
+        }
+        
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            transform: rotate(30deg);
+        }
+        
+        .login-right {
+            flex: 1;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .brand-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .brand-logo {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        
+        .brand-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .features-list {
+            list-style: none;
+            margin-top: 40px;
+        }
+        
+        .features-list li {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        
+        .features-list li i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 12px;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .login-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: #adb5bd;
+        }
+        
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            font-size: 1.2rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.3);
+        }
+        
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-icon {
+            font-size: 1.2rem;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .form-footer a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #20c997, #1ba87e);
+            color: white;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            color: #adb5bd;
+            font-size: 0.9rem;
+        }
+        
+        /* Animation pour le formulaire */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-form {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .login-card {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .login-left, .login-right {
+                padding: 40px 20px;
+            }
+            
+            .login-left {
+                border-radius: 20px 20px 0 0;
+            }
+            
+            .login-right {
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .brand-logo {
+                font-size: 3rem;
+                padding: 15px;
+            }
+            
+            .brand-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .login-title {
+                font-size: 1.8rem;
+            }
+            
+            .brand-logo {
+                font-size: 2.5rem;
+            }
+            
+            .brand-title {
+                font-size: 1.8rem;
+            }
+            
+            .login-left, .login-right {
+                padding: 30px 15px;
+            }
+        }
+        
+        /* Effet de focus personnalisé */
+        .focus-ring {
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .focus-ring:focus {
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Effet de pulsation pour le logo */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .brand-logo {
+            animation: pulse 3s infinite;
+        }
+        
+        /* Style pour les messages Django */
+        .messages-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .message-toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Chargement */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Overlay de chargement -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Container principal -->
+    <div class="login-container">
+        <div class="login-card">
+            
+            <!-- Partie gauche (présentation) -->
+            <div class="login-left">
+                <div class="brand-section">
+                    <div class="brand-logo">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h1 class="brand-title">Stock361</h1>
+                    <p class="brand-subtitle">Solution professionnelle de gestion d'inventaire</p>
+                </div>
+                
+                <ul class="features-list">
+                    <li>
+                        <i class="bi bi-box"></i>
+                        <span>Gestion complète des produits et stocks</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-cart"></i>
+                        <span>Suivi des ventes en temps réel</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-bar-chart"></i>
+                        <span>Rapports détaillés et analyses</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-people"></i>
+                        <span>Gestion multi-utilisateurs avec permissions</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-shield-check"></i>
+                        <span>Sécurité et sauvegarde des données</span>
+                    </li>
+                </ul>
+                
+                <div class="copyright">
+                    <p>&copy; 2024 Stock361. Tous droits réservés.</p>
+                </div>
+            </div>
+            
+            <!-- Partie droite (formulaire) -->
+            <div class="login-right">
+                <div class="login-header">
+                    <h2 class="login-title">Connexion</h2>
+                    <p class="login-subtitle">Accédez à votre tableau de bord</p>
+                </div>
+                
+                <!-- Affichage des messages d'erreur/succès -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="message-toast alert-{{ message.tags }}">
+                        <i class="bi bi-info-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Affichage des erreurs de formulaire -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Identifiants incorrects. Veuillez réessayer.
+                </div>
+                {% endif %}
+                
+                <form method="POST" class="login-form" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-person me-1"></i>
+                            Nom d'utilisateur
+                        </label>
+                        <div class="input-with-icon">
+                            <input type="text" 
+                                   name="username" 
+                                   class="form-control focus-ring" 
+                                   required 
+                                   placeholder="Entrez votre nom d'utilisateur"
+                                   autocomplete="username"
+                                   autofocus>
+                            <span class="input-icon">
+                                <i class="bi bi-person-circle"></i>
+                            </span>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            Utilisez votre identifiant d'entreprise
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="bi bi-lock me-1"></i>
+                            Mot de passe
+                        </label>
+                        <div class="input-with-icon">
+                            <input type="password" 
+                                   name="password" 
+                                   class="form-control focus-ring" 
+                                   required 
+                                   placeholder="Entrez votre mot de passe"
+                                   autocomplete="current-password"
+                                   id="passwordInput">
+                            <span class="input-icon" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </span>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            Minimum 8 caractères
+                        </small>
+                    </div>
+                    
+                    <button type="submit" class="login-btn" id="loginButton">
+                        <i class="bi bi-box-arrow-in-right btn-icon"></i>
+                        Se connecter
+                    </button>
+                 
+                </form>
+                
+           
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestionnaire de soumission du formulaire
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            loginForm.addEventListener('submit', function(e) {
+                // Afficher le loading
+                loadingOverlay.style.display = 'flex';
+                loginButton.disabled = true;
+                loginButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Connexion...';
+                
+                // Simuler un délai pour l'animation (supprimer en production)
+                setTimeout(() => {
+                    loginButton.disabled = false;
+                    loadingOverlay.style.display = 'none';
+                    loginButton.innerHTML = '<i class="bi bi-box-arrow-in-right btn-icon"></i> Se connecter';
+                }, 1500);
+            });
+            
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('passwordInput');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+            });
+            
+            // Validation en temps réel
+            const usernameInput = document.querySelector('input[name="username"]');
+            
+            usernameInput.addEventListener('input', function() {
+                if (this.value.trim().length > 0) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            passwordInput.addEventListener('input', function() {
+                if (this.value.length >= 8) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            // Auto-hide messages après 5 secondes
+            const messages = document.querySelectorAll('.message-toast');
+            messages.forEach(message => {
+                setTimeout(() => {
+                    message.style.transition = 'opacity 0.5s ease';
+                    message.style.opacity = '0';
+                    setTimeout(() => message.remove(), 500);
+                }, 5000);
+            });
+            
+            // Effet de focus sur les inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+            
+            // Simulation de mot de passe oublié
+            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Veuillez contacter votre administrateur système pour réinitialiser votre mot de passe.');
+            });
+            
+            // Animation d'entrée pour le formulaire
+            const formElements = document.querySelectorAll('.login-form > *');
+            formElements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 + (index * 100));
+            });
+            
+            // Ajouter une classe au body pour les animations
+            document.body.classList.add('loaded');
+        });
+        
+        // Gestion des erreurs de réseau
+        window.addEventListener('online', function() {
+            showToast('success', 'Connexion rétablie');
+        });
+        
+        window.addEventListener('offline', function() {
+            showToast('warning', 'Vous êtes hors ligne');
+        });
+        
+        function showToast(type, message) {
+            const toast = document.createElement('div');
+            toast.className = `message-toast alert-${type}`;
+            toast.innerHTML = `<i class="bi bi-info-circle me-2"></i>${message}`;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.5s ease';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

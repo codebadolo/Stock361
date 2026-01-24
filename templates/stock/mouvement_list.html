@@ -1,0 +1,858 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mouvements de Stock{% endblock %}
+
+{% block content %}
+
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-1">
+    <div>
+        <h1 class="h3 mb-1 text-gray-800">
+            <i class="bi bi-arrow-left-right text-primary me-2"></i>Mouvements de Stock
+        </h1>
+        <p class="text-muted mb-0">Suivez l'historique complet des opérations sur votre stock</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterMouvementModal">
+            <i class="bi bi-plus-circle me-2"></i>Nouveau mouvement
+        </button>
+    </div>
+</div>
+
+<!-- Statistiques -->
+<div class="row mb-1">
+    <div class="col-xl-3 col-md-6 mb-1">
+        <div class="card border-start-primary border-start-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-arrow-left-right text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Total mouvements</div>
+                        <div class="h5 mb-0">{{ stats.total|default:0 }}</div>
+                        <small class="text-muted">Ce mois: {{ stats.this_month|default:0 }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-1">
+        <div class="card border-start-success border-start-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-arrow-down-circle text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Entrées</div>
+                        <div class="h5 mb-0">{{ stats.entrees|default:0 }}</div>
+                        <small class="text-muted">+{{ stats.entrees_quantite|default:0 }} unités</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-1">
+        <div class="card border-start-danger border-start-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-arrow-up-circle text-danger fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Sorties</div>
+                        <div class="h5 mb-0">{{ stats.sorties|default:0 }}</div>
+                        <small class="text-muted">-{{ stats.sorties_quantite|default:0 }} unités</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-1">
+        <div class="card border-start-warning border-start-4 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="bi bi-sliders text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Ajustements</div>
+                        <div class="h5 mb-0">{{ stats.ajustements|default:0 }}</div>
+                        <small class="text-muted">{{ stats.ajustements_quantite|default:0 }} corrections</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="card shadow-sm mb-1">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Période</label>
+                <div class="input-group input-group-sm">
+                    <input type="date" class="form-control" id="filter-date-debut">
+                    <span class="input-group-text"><i class="bi bi-arrow-right"></i></span>
+                    <input type="date" class="form-control" id="filter-date-fin">
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Type</label>
+                <select class="form-select form-select-sm" id="filter-type">
+                    <option value="">Tous les types</option>
+                    <option value="entree">Entrées</option>
+                    <option value="sortie">Sorties</option>
+                    <option value="ajustement">Ajustements</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Produit</label>
+                <select class="form-select form-select-sm" id="filter-produit">
+                    <option value="">Tous les produits</option>
+                    {% for produit in produits %}
+                    <option value="{{ produit.nom }}">{{ produit.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end">
+                <div class="d-flex gap-2 w-100">
+                    <button class="btn btn-primary btn-sm w-100" id="btn-filtrer">
+                        <i class="bi bi-funnel me-1"></i>Filtrer
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="btn-reset">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtres rapides -->
+        <div class="mt-1">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-primary filter-quick" data-filter="today">
+                    <i class="bi bi-calendar-day me-1"></i>Aujourd'hui
+                </button>
+                <button class="btn btn-sm btn-outline-primary filter-quick" data-filter="week">
+                    <i class="bi bi-calendar-week me-1"></i>Cette semaine
+                </button>
+                <button class="btn btn-sm btn-outline-primary filter-quick" data-filter="month">
+                    <i class="bi bi-calendar-month me-1"></i>Ce mois
+                </button>
+                <button class="btn btn-sm btn-outline-success filter-quick" data-filter="entree">
+                    <i class="bi bi-arrow-down-circle me-1"></i>Entrées
+                </button>
+                <button class="btn btn-sm btn-outline-danger filter-quick" data-filter="sortie">
+                    <i class="bi bi-arrow-up-circle me-1"></i>Sorties
+                </button>
+                <button class="btn btn-sm btn-outline-warning filter-quick" data-filter="ajustement">
+                    <i class="bi bi-sliders me-1"></i>Ajustements
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table des mouvements -->
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <h6 class="m-0 fw-bold text-primary">
+            <i class="bi bi-table me-2"></i>Historique des mouvements
+        </h6>
+        <div class="text-muted small">
+            {{ mouvements|length }} mouvements affichés
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="mouvements-table">
+                <thead class="table-light">
+                    <tr>
+                        <th width="12%">
+                            <i class="bi bi-calendar me-1"></i> Date
+                        </th>
+                        <th width="20%">
+                            <i class="bi bi-box me-1"></i> Produit
+                        </th>
+                        <th width="10%">
+                            <i class="bi bi-tag me-1"></i> Type
+                        </th>
+                        <th width="12%">
+                            <i class="bi bi-hash me-1"></i> Quantité
+                        </th>
+                        <th width="10%">
+                            <i class="bi bi-arrow-left me-1"></i> Avant
+                        </th>
+                        <th width="10%">
+                            <i class="bi bi-arrow-right me-1"></i> Après
+                        </th>
+                        <th width="16%">
+                            <i class="bi bi-person me-1"></i> Utilisateur
+                        </th>
+                        <th width="20%">
+                            <i class="bi bi-chat-left-text me-1"></i> Commentaire
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in mouvements %}
+                    <tr class="mouvement-row">
+                        <td data-order="{{ m.date|date:'U' }}">
+                            <div class="fw-semibold">{{ m.date|date:"d/m/Y" }}</div>
+                            <small class="text-muted">{{ m.date|date:"H:i" }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ m.produit.nom }}</div>
+                            {% if m.produit.reference %}
+                                <small class="text-muted">{{ m.produit.reference }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if m.type_mouvement == "entree" %}
+                                <span class="badge bg-success d-inline-flex align-items-center">
+                                    <i class="bi bi-arrow-down-circle me-1"></i>Entrée
+                                </span>
+                            {% elif m.type_mouvement == "sortie" %}
+                                <span class="badge bg-danger d-inline-flex align-items-center">
+                                    <i class="bi bi-arrow-up-circle me-1"></i>Sortie
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark d-inline-flex align-items-center">
+                                    <i class="bi bi-sliders me-1"></i>Ajustement
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td data-order="{{ m.quantite }}">
+                            {% if m.type_mouvement == "entree" %}
+                                <span class="text-success fw-semibold d-inline-flex align-items-center">
+                                    <i class="bi bi-plus-circle me-1"></i>+{{ m.quantite }}
+                                </span>
+                            {% elif m.type_mouvement == "sortie" %}
+                                <span class="text-danger fw-semibold d-inline-flex align-items-center">
+                                    <i class="bi bi-dash-circle me-1"></i>-{{ m.quantite }}
+                                </span>
+                            {% else %}
+                                <span class="fw-semibold d-inline-flex align-items-center">
+                                    <i class="bi bi-arrow-left-right me-1"></i>{{ m.quantite }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ m.avant }}</span>
+                        </td>
+                        <td>
+                            {% if m.apres > m.avant %}
+                                <span class="badge bg-success bg-opacity-10 text-success">{{ m.apres }}</span>
+                            {% elif m.apres < m.avant %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">{{ m.apres }}</span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning">{{ m.apres }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                     style="width: 28px; height: 28px; font-size: 12px;">
+                                    {% if m.utilisateur and m.utilisateur.username %}
+                                        {{ m.utilisateur.username|first|upper }}
+                                    {% elif m.utilisateur and m.utilisateur.first_name %}
+                                        {{ m.utilisateur.first_name|first|upper }}
+                                    {% else %}
+                                        U
+                                    {% endif %}
+                                </div>
+                                <div class="small">
+                                    {% if m.utilisateur and m.utilisateur.get_full_name %}
+                                        <div class="fw-semibold">{{ m.utilisateur.get_full_name }}</div>
+                                        <small class="text-muted">{{ m.utilisateur.username }}</small>
+                                    {% elif m.utilisateur and m.utilisateur.username %}
+                                        {{ m.utilisateur.username }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if m.commentaire %}
+                                <div class="small">
+                                    <i class="bi bi-chat-left text-primary me-1"></i>
+                                    <span class="comment-text" data-bs-toggle="tooltip" title="{{ m.commentaire }}">
+                                        {{ m.commentaire|truncatechars:50 }}
+                                    </span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small">
+                                    <i class="bi bi-chat-left me-1"></i>-
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-arrow-left-right fs-1 mb-3 text-gray-300"></i>
+                                <h6 class="text-gray-600 mb-2">Aucun mouvement enregistré</h6>
+                                <p class="text-gray-500 small mb-3">Commencez par ajouter votre premier mouvement de stock</p>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#ajouterMouvementModal">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un mouvement
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                </div>
+                <nav aria-label="Navigation des mouvements">
+                    <ul class="pagination pagination-sm mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Précédent">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Suivant">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal pour ajouter un mouvement -->
+<div class="modal fade" id="ajouterMouvementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle text-primary me-2"></i>Nouveau mouvement
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'mouvement_create' %}" id="mouvementForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Produit <span class="text-danger">*</span></label>
+                        <select name="produit" class="form-select" id="produitSelect" required>
+                            <option value="">Sélectionner un produit</option>
+                            {% for produit in produits %}
+                                <option value="{{ produit.id }}" data-stock="{{ produit.stock.quantite|default:0 }}">
+                                    {{ produit.nom }} (Stock: {{ produit.stock.quantite|default:0 }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Type de mouvement <span class="text-danger">*</span></label>
+                        <select name="type_mouvement" class="form-select" id="typeMouvement" required>
+                            <option value="">Sélectionner</option>
+                            <option value="entree">Entrée (+ stock)</option>
+                            <option value="sortie">Sortie (- stock)</option>
+                            <option value="ajustement">Ajustement (fixe)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Quantité <span class="text-danger">*</span></label>
+                        <input type="number" name="quantite" class="form-control" id="quantiteInput" min="1" required>
+                        <div class="form-text" id="stockInfo">
+                            <i class="bi bi-info-circle me-1"></i>Sélectionnez d'abord un produit
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Commentaire (optionnel)</label>
+                        <textarea name="commentaire" class="form-control" rows="3" 
+                                  placeholder="Motif du mouvement (ex: réception fournisseur, vente client, inventaire...)"></textarea>
+                    </div>
+                    
+                    <!-- Prévisualisation -->
+                    <div class="alert alert-light border" id="preview" style="display: none;">
+                        <h6 class="alert-heading mb-2">
+                            <i class="bi bi-eye me-2"></i>Aperçu du mouvement
+                        </h6>
+                        <div class="row small">
+                            <div class="col-6">
+                                <div class="text-muted">Produit:</div>
+                                <div class="fw-semibold" id="preview-produit">-</div>
+                            </div>
+                            <div class="col-3">
+                                <div class="text-muted">Stock actuel:</div>
+                                <div class="fw-semibold" id="preview-stock-actuel">-</div>
+                            </div>
+                            <div class="col-3">
+                                <div class="text-muted">Nouveau stock:</div>
+                                <div class="fw-semibold" id="preview-nouveau-stock">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-check-circle me-1"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast pour les messages -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    {% if messages %}
+        {% for message in messages %}
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header {% if message.tags == 'success' %}bg-success text-white{% elif message.tags == 'error' %}bg-danger text-white{% elif message.tags == 'warning' %}bg-warning{% else %}bg-info text-white{% endif %}">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-circle{% elif message.tags == 'warning' %}bi-exclamation-triangle{% else %}bi-info-circle{% endif %} me-2"></i>
+                <strong class="me-auto">{{ message.tags|title }}</strong>
+                <button type="button" class="btn-close {% if message.tags in 'success,error,info' %}btn-close-white{% endif %}" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<!-- Styles -->
+<style>
+    .table th {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table td {
+        font-size: 0.9rem;
+        vertical-align: middle;
+        padding: 0.75rem;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        transition: background-color 0.2s;
+    }
+    
+    .badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 500;
+    }
+    
+    .modal-content {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        background-color: #f8f9fa;
+        border-radius: 10px 10px 0 0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    .comment-text {
+        cursor: help;
+        transition: color 0.2s;
+    }
+    
+    .comment-text:hover {
+        color: #0d6efd;
+    }
+    
+    .filter-quick.active {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.8rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.5em;
+        }
+        
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+    }
+</style>
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables
+    let currentStock = 0;
+    let selectedProduit = null;
+    
+    // Initialiser les tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(element => {
+        new bootstrap.Tooltip(element);
+    });
+    
+    // Gérer les toasts
+    const toastElList = document.querySelectorAll('.toast');
+    toastElList.forEach(toastEl => {
+        const toast = new bootstrap.Toast(toastEl);
+        setTimeout(() => toast.hide(), 5000);
+    });
+    
+    // Filtres
+    const btnFiltrer = document.getElementById('btn-filtrer');
+    const btnReset = document.getElementById('btn-reset');
+    const filterQuickBtns = document.querySelectorAll('.filter-quick');
+    const mouvementRows = document.querySelectorAll('.mouvement-row');
+    
+    // Appliquer les filtres
+    if (btnFiltrer && mouvementRows.length > 0) {
+        btnFiltrer.addEventListener('click', function() {
+            appliquerFiltres();
+        });
+    }
+    
+    // Réinitialiser les filtres
+    if (btnReset) {
+        btnReset.addEventListener('click', function() {
+            resetFiltres();
+        });
+    }
+    
+    // Filtres rapides
+    filterQuickBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Désactiver tous les boutons actifs
+            filterQuickBtns.forEach(b => b.classList.remove('active'));
+            
+            // Activer le bouton cliqué
+            this.classList.add('active');
+            
+            // Appliquer le filtre
+            switch(filter) {
+                case 'today':
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('filter-date-debut').value = today;
+                    document.getElementById('filter-date-fin').value = today;
+                    document.getElementById('filter-type').value = '';
+                    break;
+                    
+                case 'week':
+                    const now = new Date();
+                    const firstDay = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+                    const lastDay = new Date(now.setDate(now.getDate() - now.getDay() + 7));
+                    document.getElementById('filter-date-debut').value = firstDay.toISOString().split('T')[0];
+                    document.getElementById('filter-date-fin').value = lastDay.toISOString().split('T')[0];
+                    document.getElementById('filter-type').value = '';
+                    break;
+                    
+                case 'month':
+                    const todayObj = new Date();
+                    const firstDayMonth = new Date(todayObj.getFullYear(), todayObj.getMonth(), 1);
+                    const lastDayMonth = new Date(todayObj.getFullYear(), todayObj.getMonth() + 1, 0);
+                    document.getElementById('filter-date-debut').value = firstDayMonth.toISOString().split('T')[0];
+                    document.getElementById('filter-date-fin').value = lastDayMonth.toISOString().split('T')[0];
+                    document.getElementById('filter-type').value = '';
+                    break;
+                    
+                default:
+                    document.getElementById('filter-date-debut').value = '';
+                    document.getElementById('filter-date-fin').value = '';
+                    document.getElementById('filter-type').value = filter;
+            }
+            
+            document.getElementById('filter-produit').value = '';
+            appliquerFiltres();
+        });
+    });
+    
+    // Fonction pour appliquer les filtres
+    function appliquerFiltres() {
+        const dateDebut = document.getElementById('filter-date-debut').value;
+        const dateFin = document.getElementById('filter-date-fin').value;
+        const typeFilter = document.getElementById('filter-type').value;
+        const produitFilter = document.getElementById('filter-produit').value.toLowerCase();
+        
+        let visibleCount = 0;
+        
+        mouvementRows.forEach(row => {
+            let showRow = true;
+            
+            // Filtrer par type
+            if (typeFilter) {
+                const typeBadge = row.querySelector('.badge');
+                const typeText = typeBadge ? typeBadge.textContent.toLowerCase() : '';
+                const expectedType = typeFilter === 'entree' ? 'entrée' : 
+                                   typeFilter === 'sortie' ? 'sortie' : 
+                                   'ajustement';
+                
+                if (!typeText.includes(expectedType)) {
+                    showRow = false;
+                }
+            }
+            
+            // Filtrer par produit
+            if (showRow && produitFilter) {
+                const produitCell = row.cells[1];
+                const produitText = produitCell ? produitCell.textContent.toLowerCase() : '';
+                if (!produitText.includes(produitFilter)) {
+                    showRow = false;
+                }
+            }
+            
+            // Filtrer par date
+            if (showRow && (dateDebut || dateFin)) {
+                const dateCell = row.cells[0];
+                if (dateCell) {
+                    const dateText = dateCell.querySelector('.fw-semibold').textContent;
+                    const [day, month, year] = dateText.split('/');
+                    const rowDate = new Date(year, month - 1, day);
+                    
+                    if (dateDebut) {
+                        const minDate = new Date(dateDebut);
+                        if (rowDate < minDate) showRow = false;
+                    }
+                    
+                    if (dateFin) {
+                        const maxDate = new Date(dateFin);
+                        if (rowDate > maxDate) showRow = false;
+                    }
+                }
+            }
+            
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) visibleCount++;
+        });
+        
+        // Mettre à jour le compteur
+        const counter = document.querySelector('.card-header .text-muted');
+        if (counter) {
+            counter.textContent = `${visibleCount} mouvements affichés`;
+        }
+    }
+    
+    // Fonction pour réinitialiser les filtres
+    function resetFiltres() {
+        document.getElementById('filter-date-debut').value = '';
+        document.getElementById('filter-date-fin').value = '';
+        document.getElementById('filter-type').value = '';
+        document.getElementById('filter-produit').value = '';
+        
+        // Désactiver les boutons rapides
+        filterQuickBtns.forEach(btn => btn.classList.remove('active'));
+        
+        // Afficher toutes les lignes
+        mouvementRows.forEach(row => {
+            row.style.display = '';
+        });
+        
+        // Mettre à jour le compteur
+        const counter = document.querySelector('.card-header .text-muted');
+        if (counter) {
+            counter.textContent = `${mouvementRows.length} mouvements affichés`;
+        }
+    }
+    
+    // Gestion du modal
+    const mouvementForm = document.getElementById('mouvementForm');
+    const produitSelect = document.getElementById('produitSelect');
+    const typeMouvement = document.getElementById('typeMouvement');
+    const quantiteInput = document.getElementById('quantiteInput');
+    const stockInfo = document.getElementById('stockInfo');
+    const preview = document.getElementById('preview');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Mettre à jour les informations de stock
+    if (produitSelect) {
+        produitSelect.addEventListener('change', function() {
+            selectedProduit = this.value;
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedProduit) {
+                currentStock = parseInt(selectedOption.dataset.stock) || 0;
+                stockInfo.innerHTML = `<i class="bi bi-check-circle text-success me-1"></i>Stock actuel: <strong>${currentStock}</strong>`;
+                
+                // Activer le champ type
+                typeMouvement.focus();
+            } else {
+                stockInfo.innerHTML = `<i class="bi bi-info-circle me-1"></i>Sélectionnez d'abord un produit`;
+                currentStock = 0;
+                preview.style.display = 'none';
+            }
+            
+            updatePreview();
+        });
+    }
+    
+    // Mettre à jour la prévisualisation
+    if (typeMouvement) {
+        typeMouvement.addEventListener('change', updatePreview);
+    }
+    
+    if (quantiteInput) {
+        quantiteInput.addEventListener('input', updatePreview);
+    }
+    
+    function updatePreview() {
+        if (!selectedProduit || !typeMouvement.value || !quantiteInput.value) {
+            preview.style.display = 'none';
+            return;
+        }
+        
+        const produitName = produitSelect.options[produitSelect.selectedIndex].text;
+        const quantite = parseInt(quantiteInput.value) || 0;
+        const type = typeMouvement.value;
+        
+        let nouveauStock = currentStock;
+        
+        if (type === 'entree') {
+            nouveauStock = currentStock + quantite;
+        } else if (type === 'sortie') {
+            nouveauStock = currentStock - quantite;
+        } else if (type === 'ajustement') {
+            nouveauStock = quantite;
+        }
+        
+        // Mettre à jour la prévisualisation
+        document.getElementById('preview-produit').textContent = produitName.split('(')[0].trim();
+        document.getElementById('preview-stock-actuel').textContent = currentStock;
+        document.getElementById('preview-nouveau-stock').textContent = nouveauStock;
+        
+        // Colorer le nouveau stock
+        const nouveauStockEl = document.getElementById('preview-nouveau-stock');
+        if (nouveauStock > currentStock) {
+            nouveauStockEl.className = 'fw-semibold text-success';
+        } else if (nouveauStock < currentStock) {
+            nouveauStockEl.className = 'fw-semibold text-danger';
+        } else {
+            nouveauStockEl.className = 'fw-semibold text-warning';
+        }
+        
+        preview.style.display = 'block';
+    }
+    
+    // Validation du formulaire
+    if (mouvementForm) {
+        mouvementForm.addEventListener('submit', function(e) {
+            const quantite = parseInt(quantiteInput.value);
+            const type = typeMouvement.value;
+            
+            // Validation de base
+            if (quantite <= 0) {
+                e.preventDefault();
+                alert('La quantité doit être supérieure à 0');
+                quantiteInput.focus();
+                return;
+            }
+            
+            // Validation pour les sorties
+            if (type === 'sortie' && quantite > currentStock) {
+                const confirmation = confirm(
+                    `Stock insuffisant ! Stock actuel: ${currentStock}\n` +
+                    `Voulez-vous quand même effectuer cette sortie ?`
+                );
+                
+                if (!confirmation) {
+                    e.preventDefault();
+                    quantiteInput.focus();
+                    return;
+                }
+            }
+            
+            // Désactiver le bouton pendant l'envoi
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Enregistrement...';
+            }
+        });
+    }
+    
+    // Réinitialiser le modal quand il se ferme
+    const modal = document.getElementById('ajouterMouvementModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            if (mouvementForm) {
+                mouvementForm.reset();
+            }
+            if (stockInfo) {
+                stockInfo.innerHTML = '<i class="bi bi-info-circle me-1"></i>Sélectionnez d\'abord un produit';
+            }
+            if (preview) {
+                preview.style.display = 'none';
+            }
+            currentStock = 0;
+            selectedProduit = null;
+            
+            // Réactiver le bouton
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Enregistrer';
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

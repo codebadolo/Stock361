@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu Vente #{{ vente.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        .header { text-align: center; margin-bottom: 2em; }
+        .header h1 { margin: 0; }
+        .header p { margin: 0; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+        th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        .total { text-align: right; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ vente.entreprise.nom }}</h1>
+        <p>Contact: {{ vente.entreprise.contact }}</p>
+        <p>Adresse: {{ vente.entreprise.adresse }}</p>
+        <p>Date: {{ vente.date }}</p>
+        <h2>Reçu Vente #{{ vente.id }}</h2>
+    </div>
+
+    <p>Client: {{ vente.client.nom if vente.client else "Client final" }}</p>
+    <p>Vendeur: {{ vente.utilisateur.username }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ligne in vente.lignes.all %}
+            <tr>
+                <td>{{ ligne.produit.nom }}</td>
+                <td>{{ ligne.quantite }}</td>
+                <td>{{ ligne.prix_unitaire|floatformat:2 }}</td>
+                <td>{{ ligne.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="total">Total: {{ vente.total|floatformat:2 }} FCFA</p>
+</body>
+</html>

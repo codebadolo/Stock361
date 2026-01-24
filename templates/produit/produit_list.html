@@ -1,0 +1,1310 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des Produits{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+<style>
+.card {
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+.table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    vertical-align: middle;
+}
+.border-left-primary { border-left: 4px solid #0d6efd !important; }
+.border-left-success { border-left: 4px solid #198754 !important; }
+.border-left-warning { border-left: 4px solid #ffc107 !important; }
+.border-left-danger { border-left: 4px solid #dc3545 !important; }
+.stat-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+.badge-stock {
+    padding: 0.2em 0.4em;
+    font-size: 0.65em;
+    font-weight: 600;
+    border-radius: 10rem;
+}
+.btn-action {
+    padding: 0.15rem 0.3rem;
+    margin: 0 1px;
+    font-size: 0.75rem;
+}
+.filters-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem !important;
+}
+.filter-badge {
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.75rem;
+    padding: 0.2em 0.5em;
+}
+.filter-badge:hover {
+    transform: scale(1.05);
+}
+.filter-badge.active {
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    padding: 0.25rem 0.5rem;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.dt-buttons .btn {
+    border-radius: 0.375rem;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+}
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+table.dataTable tbody tr {
+    transition: background-color 0.2s;
+    height: 40px;
+}
+table.dataTable tbody tr.selected {
+    background-color: rgba(13, 110, 253, 0.1) !important;
+}
+table.dataTable tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05) !important;
+}
+.dataTables_length select {
+    border-radius: 0.375rem;
+    padding: 0.2rem 1.5rem 0.2rem 0.4rem;
+    font-size: 0.8rem;
+}
+.export-dropdown .dropdown-menu {
+    min-width: 160px;
+}
+.table-compact .btn-group {
+    flex-wrap: nowrap;
+}
+.product-name {
+    font-weight: 500;
+    font-size: 0.85rem;
+    line-height: 1.1;
+}
+.product-description {
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-top: 1px;
+}
+.progress-thin {
+    height: 5px;
+    min-width: 50px;
+}
+.price-cell {
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-align: right;
+}
+.price-header {
+    text-align: center;
+    font-weight: 600;
+}
+.actions-cell {
+    min-width: 90px;
+}
+.compact-row {
+    min-height: 35px;
+}
+/* Réduire l'espacement */
+.mb-3 {
+    margin-bottom: 0.75rem !important;
+}
+/* Positionner le tableau plus haut */
+.table-container {
+    margin-top: 0.25rem;
+}
+/* Style pour le lien de détail */
+.detail-link {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    font-size: 0.85rem;
+}
+.detail-link:hover {
+    color: #084298;
+    text-decoration: underline;
+}
+/* Style pour les lignes sélectionnées */
+.selection-info {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+.selection-info .badge {
+    font-size: 0.75rem;
+}
+/* Contrôles de sélection */
+.selection-controls {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.selection-btn {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+}
+/* Couleurs pour les prix */
+.price-achat {
+    color: #6c757d;
+    font-weight: 500;
+}
+.price-detail {
+    color: #198754;
+    font-weight: 600;
+}
+.price-gros {
+    color: #0d6efd;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- En-tête compact -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <h1 class="mb-0" style="font-size: 1.4rem;">
+            <i class="bi bi-box-seam me-2"></i>Gestion des Produits
+        </h1>
+        <p class="text-muted mb-0" style="font-size: 0.8rem;">
+            <i class="bi bi-info-circle me-1"></i>
+            Gérez votre inventaire et suivez l'état des stocks
+        </p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-success btn-sm" id="btnNouveauProduit">
+            <i class="bi bi-plus-circle me-1"></i> Nouveau Produit
+        </button>
+    </div>
+</div>
+
+<!-- Statistiques compactes -->
+<div class="row g-2 mb-2">
+    <div class="col-md-3">
+        <div class="card border-left-primary shadow-sm h-100 stat-card" data-filter="all" style="min-height: 70px;">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small" style="font-size: 0.7rem;">Total Produits</div>
+                        <div class="h5 mb-0 fw-bold text-primary">{{ total_produits }}</div>
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-box-seam fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-left-success shadow-sm h-100 stat-card" data-filter="normal" style="min-height: 70px;">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small" style="font-size: 0.7rem;">Stock Normal</div>
+                        <div class="h5 mb-0 fw-bold text-success">{{ total_normal }}</div>
+                    </div>
+                    <div class="text-success">
+                        <i class="bi bi-check-circle fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+    <div class="col-md-3">
+        <div class="card border-left-warning shadow-sm h-100 stat-card" data-filter="critique" style="min-height: 70px;">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small" style="font-size: 0.7rem;">Stock Critique</div>
+                        <div class="h5 mb-0 fw-bold text-warning">{{ total_critique }}</div>
+                    </div>
+                    <div class="text-warning">
+                        <i class="bi bi-exclamation-triangle fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-left-danger shadow-sm h-100 stat-card" data-filter="rupture" style="min-height: 70px;">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small" style="font-size: 0.7rem;">En Rupture</div>
+                        <div class="h5 mb-0 fw-bold text-danger">{{ total_rupture }}</div>
+                    </div>
+                    <div class="text-danger">
+                        <i class="bi bi-x-circle fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres rapides -->
+<div class="card filters-card mb-2">
+    <div class="card-body p-2">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h6 class="mb-0" style="font-size: 0.85rem;"><i class="bi bi-funnel me-2"></i>Filtres rapides :</h6>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex flex-wrap gap-1 justify-content-end">
+                    <span class="badge bg-primary filter-badge active" data-filter="all">Tous</span>
+                    <span class="badge bg-success filter-badge" data-filter="normal">Normal</span>
+                    <span class="badge bg-warning filter-badge" data-filter="critique">Critique</span>
+                    <span class="badge bg-danger filter-badge" data-filter="rupture">Rupture</span>
+                    <span class="badge bg-info filter-badge" data-filter="actif">Actifs</span>
+                    <span class="badge bg-secondary filter-badge" data-filter="inactif">Inactifs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contrôles de sélection -->
+<!-- <div class="selection-controls d-flex justify-content-between align-items-center" id="selectionControls" style="display: none !important;">
+    <div>
+        <span class="text-muted" style="font-size: 0.8rem;">
+            <i class="bi bi-check-square me-1"></i>
+            <span id="selectedCount">0</span> produit(s) sélectionné(s)
+        </span>
+    </div>
+    <div class="d-flex gap-1">
+        <button class="btn btn-outline-secondary btn-sm selection-btn" id="selectAllBtn">
+            <i class="bi bi-check-all me-1"></i>Tout sélectionner
+        </button>
+        <button class="btn btn-outline-secondary btn-sm selection-btn" id="deselectAllBtn">
+            <i class="bi bi-x-square me-1"></i>Tout désélectionner
+        </button>
+        <button class="btn btn-outline-primary btn-sm selection-btn" id="exportSelectedBtn">
+            <i class="bi bi-download me-1"></i>Exporter sélection
+        </button>
+        {% if not request.user.est_gerant %}
+        <button class="btn btn-outline-danger btn-sm selection-btn" id="deleteSelectedBtn">
+            <i class="bi bi-trash me-1"></i>Supprimer sélection
+        </button>
+        {% endif %}
+    </div>
+</div> -->
+
+<!-- Tableau compact avec tous les prix -->
+<div class="card shadow-sm table-container">
+    <div class="card-header bg-white border-bottom-0 pb-1 pt-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0" style="font-size: 0.95rem;">
+                <i class="bi bi-table me-2"></i>Liste des Produits
+                <small class="text-muted ms-2" id="tableInfo" style="font-size: 0.75rem;"></small>
+            </h5>
+            <div class="dropdown export-dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-download me-1"></i> Exporter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" id="exportExcel"><i class="bi bi-file-excel text-success me-2"></i> Excel</a></li>
+                    <li><a class="dropdown-item" href="#" id="exportPDF"><i class="bi bi-file-pdf text-danger me-2"></i> PDF</a></li>
+                    <li><a class="dropdown-item" href="#" id="exportCSV"><i class="bi bi-file-text text-info me-2"></i> CSV</a></li>
+                    <li><a class="dropdown-item" href="#" id="exportPrint"><i class="bi bi-printer text-secondary me-2"></i> Imprimer</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="exportVisible"><i class="bi bi-eye me-2"></i> Exporter visible</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-1">
+        <div class="table-responsive">
+            <table id="produitsTable" class="table table-hover align-middle w-100 compact-row">
+                <thead class="table-light">
+                    <tr>
+                        <th width="4%"></th> <!-- Colonne sélection -->
+                        <th width="8%">Référence</th>
+                        <th width="22%">Produit</th>
+                        <th width="12%">Catégorie</th>
+                        <th width="10%" class="price-header">Prix Achat</th>
+                        <th width="10%" class="price-header">Prix Détail</th>
+                        <th width="10%" class="price-header">Prix Gros</th>
+                        <th width="8%" class="text-center">Stock</th>
+                        <th width="8%" class="text-center">État</th>
+                        <th width="8%" class="text-center actions-cell">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for produit in produits %}
+                    <tr class="compact-row" data-id="{{ produit.id }}" data-etat="{{ produit.etat_stock }}" data-actif="{{ produit.est_actif|yesno:'true,false' }}">
+                        <td></td> <!-- DataTables ajoutera les cases à cocher ici -->
+                        <td class="fw-semibold" style="font-size: 0.8rem;">{{ produit.reference }}</td>
+                        <td>
+                            <a href="{% url 'produit:produit_detail' produit.id %}" class="detail-link product-name">
+                                {{ produit.nom }}
+                            </a>
+                            {% if produit.description %}
+                            <div class="product-description text-muted">
+                                {{ produit.description|truncatechars:40 }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if produit.categorie %}
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25" style="font-size: 0.7rem; padding: 0.15em 0.4em;">
+                                    {{ produit.categorie.nom }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small" style="font-size: 0.7rem;">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="price-cell price-achat">
+                            {% if produit.prix_achat %}
+                                {{ produit.prix_achat|floatformat:0 }} FCFA
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="price-cell price-detail">
+                            {{ produit.prix_vente_detail|floatformat:0 }} FCFA
+                        </td>
+                        <td class="price-cell price-gros">
+                            {% if produit.prix_vente_gros %}
+                                {{ produit.prix_vente_gros|floatformat:0 }} FCFA
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <!-- <div class="progress progress-thin flex-grow-1 me-1">
+                                    {% if produit.etat_stock == 'rupture' %}
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                                    {% elif produit.etat_stock == 'critique' %}
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 30%"></div>
+                                    {% else %}
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 70%"></div>
+                                    {% endif %}
+                                </div> -->
+                                <div class="fw-bold" style="font-size: 0.8rem;">
+                                    {% if produit.quantite_stock %}{{ produit.quantite_stock }}{% else %}0{% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            {% if produit.etat_stock == 'rupture' %}
+                                <span class="badge bg-danger badge-stock">
+                                    <i class="bi bi-x-circle me-1"></i> Rupture
+                                </span>
+                            {% elif produit.etat_stock == 'critique' %}
+                                <span class="badge bg-warning badge-stock">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Critique
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success badge-stock">
+                                    <i class="bi bi-check-circle me-1"></i> Normal
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm table-compact" role="group">
+                                <a href="{% url 'produit:produit_detail' produit.id %}" class="btn btn-outline-info btn-action" 
+                                   data-bs-toggle="tooltip" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-primary btn-action btn-edit" 
+                                        data-id="{{ produit.id }}"
+                                        data-bs-toggle="tooltip" title="Modifier">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                {% if not request.user.est_gerant %}
+                                <button type="button" class="btn btn-outline-danger btn-action btn-delete" 
+                                        data-id="{{ produit.id }}"
+                                        data-nom="{{ produit.nom|escapejs }}"
+                                        data-bs-toggle="tooltip" title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-3">
+                            <div class="text-muted mb-2">
+                                <i class="bi bi-box-seam fs-2"></i>
+                            </div>
+                            <h6 class="text-muted">Aucun produit trouvé</h6>
+                            <button type="button" class="btn btn-success btn-sm mt-1" id="btnCreateEmpty">
+                                <i class="bi bi-plus-circle me-1"></i> Créer un produit
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Produit -->
+<div class="modal fade" id="produitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="bi bi-box-seam me-2"></i>Nouveau Produit
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="produitForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="produitId" name="produit_id">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du produit *</label>
+                                <input type="text" class="form-control" id="nom" name="nom" required>
+                                <div class="invalid-feedback" id="nomError"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Catégorie</label>
+                                <select class="form-select" id="categorie" name="categorie">
+                                    <option value="">Sélectionnez une catégorie</option>
+                                    {% for categorie in request.user.entreprise.categories.all %}
+                                    <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback" id="categorieError"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                <div class="invalid-feedback" id="descriptionError"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Prix d'achat (FCFA)</label>
+                                    <input type="number" class="form-control" id="prix_achat" name="prix_achat" step="0.01" min="0">
+                                    <div class="invalid-feedback" id="prix_achatError"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Prix de vente (FCFA) *</label>
+                                    <input type="number" class="form-control" id="prix_vente_detail" name="prix_vente_detail" step="0.01" min="0" required>
+                                    <div class="invalid-feedback" id="prix_vente_detailError"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Prix de gros (FCFA)</label>
+                                <input type="number" class="form-control" id="prix_vente_gros" name="prix_vente_gros" step="0.01" min="0">
+                                <div class="invalid-feedback" id="prix_vente_grosError"></div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Stock minimum</label>
+                                    <input type="number" class="form-control" id="stock_minimum" name="stock_minimum" min="0" value="0">
+                                    <div class="invalid-feedback" id="stock_minimumError"></div>
+                                </div>
+                                <!-- <div class="col-md-6">
+                                    <label class="form-label">Quantité en stock</label>
+                                    <input type="number" class="form-control" id="quantite_stock" name="quantite_stock" min="0" value="0">
+                                    <div class="invalid-feedback" id="quantite_stockError"></div>
+                                </div> -->
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="est_actif" name="est_actif" checked>
+                                    <label class="form-check-label" for="est_actif">
+                                        Produit actif
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSaveProduit">
+                    <i class="bi bi-save me-1"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Suppression (uniquement pour non-gérants) -->
+{% if not request.user.est_gerant %}
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-trash me-2"></i>Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                </div>
+                <p class="text-center">Êtes-vous sûr de vouloir supprimer le produit <strong id="deleteProduitName"></strong> ?</p>
+                <div class="alert alert-danger">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Cette action est irréversible ! Toutes les données associées seront perdues.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+                    <i class="bi bi-trash me-1"></i> Supprimer définitivement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Suppression multiple -->
+<div class="modal fade" id="deleteMultipleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-trash me-2"></i>Supprimer plusieurs produits</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1"></i>
+                </div>
+                <p class="text-center">Êtes-vous sûr de vouloir supprimer <strong id="deleteCount"></strong> produit(s) sélectionné(s) ?</p>
+                <div class="alert alert-danger">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Cette action est irréversible ! Toutes les données associées seront perdues.
+                </div>
+                <div id="selectedProductsList" class="mt-3">
+                    <!-- Liste des produits sélectionnés -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDeleteMultiple">
+                    <i class="bi bi-trash me-1"></i> Supprimer la sélection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+// Variables globales
+let table;
+let currentProduitId = null;
+let produitToDeleteId = null;
+let currentFilter = 'all';
+
+// Fonction pour mettre à jour l'information de sélection
+function updateSelectionInfo() {
+    const selectedCount = table.rows({ selected: true }).count();
+    const totalCount = table.rows().count();
+    
+    // Mettre à jour le compteur
+    document.getElementById('selectedCount').textContent = selectedCount;
+    
+    // Mettre à jour l'info du tableau
+    document.getElementById('tableInfo').textContent = `${selectedCount} sélectionné(s) sur ${totalCount}`;
+    
+    // Afficher/masquer les contrôles de sélection
+    const selectionControls = document.getElementById('selectionControls');
+    if (selectedCount > 0) {
+        selectionControls.style.display = 'flex';
+    } else {
+        selectionControls.style.display = 'none';
+    }
+}
+
+// Fonction pour ouvrir modal
+function openModal(action, produitId = null) {
+    currentProduitId = produitId;
+    
+    if (action === 'create') {
+        document.getElementById('modalTitle').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Nouveau Produit';
+        resetForm();
+    } else if (action === 'edit' && produitId) {
+        document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>Modifier le Produit';
+        loadProduitData(produitId);
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('produitModal'));
+    modal.show();
+}
+
+// Fonction pour charger données produit
+function loadProduitData(produitId) {
+    fetch(`/produit/produits/${produitId}/detail-json/`)
+        .then(response => {
+            if (!response.ok) throw new Error('Erreur réseau');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success && data.data) {
+                const produit = data.data;
+                document.getElementById('produitId').value = produit.id;
+                document.getElementById('nom').value = produit.nom;
+                document.getElementById('categorie').value = produit.categorie || '';
+                document.getElementById('description').value = produit.description || '';
+                document.getElementById('prix_achat').value = produit.prix_achat || '';
+                document.getElementById('prix_vente_detail').value = produit.prix_vente_detail;
+                document.getElementById('prix_vente_gros').value = produit.prix_vente_gros || '';
+                document.getElementById('stock_minimum').value = produit.stock_minimum || 0;
+                document.getElementById('quantite_stock').value = produit.quantite_stock || 0;
+                document.getElementById('est_actif').checked = produit.est_actif;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('error', 'Erreur lors du chargement des données');
+        });
+}
+
+// Fonction pour réinitialiser formulaire
+function resetForm() {
+    document.getElementById('produitForm').reset();
+    document.getElementById('produitId').value = '';
+    document.getElementById('est_actif').checked = true;
+    clearErrors();
+}
+
+// Fonction pour effacer les erreurs
+function clearErrors() {
+    document.querySelectorAll('.is-invalid').forEach(el => {
+        el.classList.remove('is-invalid');
+    });
+    document.querySelectorAll('.invalid-feedback').forEach(el => {
+        el.textContent = '';
+    });
+}
+
+// Fonction pour sauvegarder produit
+function saveProduit() {
+    clearErrors();
+    
+    const form = document.getElementById('produitForm');
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    const url = currentProduitId 
+        ? `/produit/produits/${currentProduitId}/modifier/` 
+        : '/produit/produits/nouveau/';
+    
+    const saveBtn = document.getElementById('btnSaveProduit');
+    setButtonLoading(saveBtn, true, 'Enregistrement...');
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Fermer modal
+            bootstrap.Modal.getInstance(document.getElementById('produitModal')).hide();
+            
+            // Afficher message de succès
+            showToast('success', data.message || 'Produit enregistré avec succès !');
+            
+            // Recharger page
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            // Afficher erreurs
+            if (data.errors) {
+                for (const field in data.errors) {
+                    const input = document.getElementById(field);
+                    const errorDiv = document.getElementById(field + 'Error');
+                    if (input && errorDiv) {
+                        input.classList.add('is-invalid');
+                        errorDiv.textContent = data.errors[field].join(', ');
+                    }
+                }
+            }
+            showToast('error', 'Veuillez corriger les erreurs dans le formulaire');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showToast('error', 'Erreur lors de l\'enregistrement');
+    })
+    .finally(() => {
+        setButtonLoading(saveBtn, false);
+    });
+}
+
+// Fonction pour confirmer suppression (uniquement si l'utilisateur n'est pas gérant)
+function confirmDelete(produitId, produitNom) {
+    {% if not request.user.est_gerant %}
+    produitToDeleteId = produitId;
+    document.getElementById('deleteProduitName').textContent = produitNom;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+    {% endif %}
+}
+
+// Fonction pour supprimer produit
+function deleteProduit() {
+    {% if not request.user.est_gerant %}
+    if (!produitToDeleteId) return;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const deleteBtn = document.getElementById('btnConfirmDelete');
+    setButtonLoading(deleteBtn, true, 'Suppression...');
+    
+    fetch(`/produit/produits/${produitToDeleteId}/supprimer/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Fermer modal
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            
+            // Afficher message de succès
+            showToast('success', data.message || 'Produit supprimé avec succès !');
+            
+            // Supprimer la ligne du tableau
+            if (table) {
+                table.row($(`tr[data-id="${produitToDeleteId}"]`)).remove().draw();
+                updateSelectionInfo();
+            }
+        } else {
+            showToast('error', data.message || 'Erreur lors de la suppression');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showToast('error', 'Erreur lors de la suppression');
+    })
+    .finally(() => {
+        setButtonLoading(deleteBtn, false);
+    });
+    {% endif %}
+}
+
+// Fonction pour supprimer plusieurs produits
+function deleteMultipleProducts() {
+    {% if not request.user.est_gerant %}
+    const selectedRows = table.rows({ selected: true });
+    const selectedCount = selectedRows.count();
+    
+    if (selectedCount === 0) {
+        showToast('warning', 'Veuillez sélectionner au moins un produit');
+        return;
+    }
+    
+    // Préparer la liste des produits
+    const productsList = document.getElementById('selectedProductsList');
+    productsList.innerHTML = '';
+    
+    selectedRows.every(function() {
+        const row = this.node();
+        const productName = $(row).find('.product-name').text().trim();
+        const productRef = $(row).find('td:nth-child(2)').text().trim();
+        
+        const productItem = document.createElement('div');
+        productItem.className = 'd-flex justify-content-between align-items-center mb-1';
+        productItem.innerHTML = `
+            <span class="text-truncate" style="max-width: 70%;">${productName}</span>
+            <span class="badge bg-secondary">${productRef}</span>
+        `;
+        productsList.appendChild(productItem);
+    });
+    
+    document.getElementById('deleteCount').textContent = selectedCount;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteMultipleModal'));
+    modal.show();
+    {% endif %}
+}
+
+// Fonction pour confirmer la suppression multiple
+function confirmDeleteMultiple() {
+    {% if not request.user.est_gerant %}
+    const selectedRows = table.rows({ selected: true });
+    const selectedIds = [];
+    
+    selectedRows.every(function() {
+        const row = this.node();
+        const productId = $(row).data('id');
+        selectedIds.push(productId);
+    });
+    
+    if (selectedIds.length === 0) return;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const deleteBtn = document.getElementById('btnConfirmDeleteMultiple');
+    setButtonLoading(deleteBtn, true, 'Suppression...');
+    
+    fetch('/produit/produits/supprimer-multiple/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ ids: selectedIds })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erreur réseau');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Fermer modal
+            bootstrap.Modal.getInstance(document.getElementById('deleteMultipleModal')).hide();
+            
+            // Afficher message de succès
+            showToast('success', `${data.count} produit(s) supprimé(s) avec succès !`);
+            
+            // Supprimer les lignes sélectionnées
+            selectedRows.remove().draw();
+            updateSelectionInfo();
+        } else {
+            showToast('error', data.message || 'Erreur lors de la suppression');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        showToast('error', 'Erreur lors de la suppression');
+    })
+    .finally(() => {
+        setButtonLoading(deleteBtn, false);
+    });
+    {% endif %}
+}
+
+// Fonction pour appliquer filtre
+function applyFilter(filterType) {
+    currentFilter = filterType;
+    
+    // Mettre à jour les badges actifs
+    document.querySelectorAll('.filter-badge').forEach(badge => {
+        badge.classList.remove('active');
+        if (badge.dataset.filter === filterType) {
+            badge.classList.add('active');
+        }
+    });
+    
+    // Appliquer le filtre à DataTable
+    if (table) {
+        switch(filterType) {
+            case 'all':
+                table.search('').columns().search('').draw();
+                break;
+            case 'normal':
+                table.column(8).search('Normal').draw();
+                break;
+            case 'critique':
+                table.column(8).search('Critique').draw();
+                break;
+            case 'rupture':
+                table.column(8).search('Rupture').draw();
+                break;
+            case 'actif':
+                table.rows().every(function() {
+                    var row = this.node();
+                    if ($(row).data('actif') === 'true') {
+                        $(row).show();
+                    } else {
+                        $(row).hide();
+                    }
+                });
+                break;
+            case 'inactif':
+                table.rows().every(function() {
+                    var row = this.node();
+                    if ($(row).data('actif') === 'false') {
+                        $(row).show();
+                    } else {
+                        $(row).hide();
+                    }
+                });
+                break;
+        }
+    }
+}
+
+// Fonction pour exporter les données
+function exportData(type, onlySelected = false, onlyVisible = false) {
+    if (!table) return;
+    
+    let buttons = table.buttons().container();
+    let exportButton = null;
+    
+    switch(type) {
+        case 'excel':
+            exportButton = $(buttons).find('.buttons-excel');
+            break;
+        case 'pdf':
+            exportButton = $(buttons).find('.buttons-pdf');
+            break;
+        case 'csv':
+            exportButton = $(buttons).find('.buttons-csv');
+            break;
+        case 'print':
+            exportButton = $(buttons).find('.buttons-print');
+            break;
+    }
+    
+    if (exportButton && exportButton.length) {
+        if (onlySelected) {
+            const selectedRows = table.rows({ selected: true });
+            if (selectedRows.count() === 0) {
+                showToast('warning', 'Veuillez sélectionner au moins un produit');
+                return;
+            }
+            exportButton.trigger('click');
+        } else {
+            exportButton.trigger('click');
+        }
+    }
+}
+
+// Initialisation DataTable
+$(document).ready(function() {
+    // Initialiser DataTable avec sélection avancée
+    table = $('#produitsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        },
+        responsive: true,
+        
+        pageLength: 25,
+        
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tous"]],
+        order: [[1, 'asc']],
+        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="bi bi-file-excel me-1"></i> Excel',
+                className: 'btn btn-success btn-sm',
+                exportOptions: {
+                    columns: ':visible',
+                    orthogonal: 'export',
+                    modifier: {
+                        selected: null
+                    }
+                },
+                title: 'Liste des Produits',
+                messageTop: 'Export généré le ' + new Date().toLocaleDateString()
+            },
+            {
+                extend: 'pdfHtml5',
+                text: '<i class="bi bi-file-pdf me-1"></i> PDF',
+                className: 'btn btn-danger btn-sm',
+                exportOptions: {
+                    columns: ':visible',
+                    orthogonal: 'export',
+                    modifier: {
+                        selected: null
+                    }
+                },
+                title: 'Liste des Produits',
+                messageTop: 'Export généré le ' + new Date().toLocaleDateString()
+            },
+            {
+                extend: 'csv',
+                text: '<i class="bi bi-file-text me-1"></i> CSV',
+                className: 'btn btn-info btn-sm',
+                exportOptions: {
+                    columns: ':visible',
+                    orthogonal: 'export',
+                    modifier: {
+                        selected: null
+                    }
+                }
+            },
+            {
+                extend: 'print',
+                text: '<i class="bi bi-printer me-1"></i> Imprimer',
+                className: 'btn btn-secondary btn-sm',
+                exportOptions: {
+                    columns: ':visible',
+                    orthogonal: 'export',
+                    modifier: {
+                        selected: null
+                    }
+                },
+                title: 'Liste des Produits'
+            },
+            {
+                extend: 'colvis',
+                text: '<i class="bi bi-eye-slash me-1"></i> Colonnes',
+                className: 'btn btn-outline-secondary btn-sm',
+                columns: ':not(:first):not(:last)'
+            }
+        ],
+        select: {
+            style: 'multi+shift',
+            selector: 'td:first-child',
+            blurable: true
+        },
+        columnDefs: [
+            {
+                orderable: false,
+                targets: [0, 9]
+            },
+            {
+                searchable: false,
+                targets: [0, 9]
+            },
+            {
+                className: 'select-checkbox',
+                targets: 0
+            }
+        ],
+        scrollY: '550px',
+        scrollCollapse: true,
+        paging: true,
+        info: true
+    });
+    
+    // Initialiser tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Événements
+    $('#btnNouveauProduit, #btnCreateEmpty').on('click', function() {
+        openModal('create');
+    });
+    
+    $('#btnSaveProduit').on('click', saveProduit);
+    
+    {% if not request.user.est_gerant %}
+    $('#btnConfirmDelete').on('click', deleteProduit);
+    $('#btnConfirmDeleteMultiple').on('click', confirmDeleteMultiple);
+    {% endif %}
+    
+    // Événements délégués pour les boutons dans le tableau
+    $(document).on('click', '.btn-edit', function() {
+        const produitId = $(this).data('id');
+        openModal('edit', produitId);
+    });
+    
+    $(document).on('click', '.btn-delete', function() {
+        const produitId = $(this).data('id');
+        const produitNom = $(this).data('nom');
+        confirmDelete(produitId, produitNom);
+    });
+    
+    // Événements pour les filtres
+    $('.filter-badge').on('click', function() {
+        const filterType = $(this).data('filter');
+        applyFilter(filterType);
+    });
+    
+    $('.stat-card').on('click', function() {
+        const filterType = $(this).data('filter');
+        applyFilter(filterType);
+    });
+    
+    // Événements pour l'export
+    $('#exportExcel').on('click', function(e) {
+        e.preventDefault();
+        exportData('excel');
+    });
+    
+    $('#exportPDF').on('click', function(e) {
+        e.preventDefault();
+        exportData('pdf');
+    });
+    
+    $('#exportCSV').on('click', function(e) {
+        e.preventDefault();
+        exportData('csv');
+    });
+    
+    $('#exportPrint').on('click', function(e) {
+        e.preventDefault();
+        exportData('print');
+    });
+    
+    $('#exportVisible').on('click', function(e) {
+        e.preventDefault();
+        exportData('excel', false, true);
+    });
+    
+    $('#exportSelectedBtn').on('click', function(e) {
+        e.preventDefault();
+        exportData('excel', true);
+    });
+    
+    // Contrôles de sélection
+    $('#selectAllBtn').on('click', function() {
+        table.rows().select();
+        updateSelectionInfo();
+    });
+    
+    $('#deselectAllBtn').on('click', function() {
+        table.rows().deselect();
+        updateSelectionInfo();
+    });
+    
+    {% if not request.user.est_gerant %}
+    $('#deleteSelectedBtn').on('click', function() {
+        deleteMultipleProducts();
+    });
+    {% endif %}
+    
+    // Écouter les changements de sélection
+    table.on('select deselect', function() {
+        updateSelectionInfo();
+    });
+    
+    // Recherche avancée avec délai
+    let searchTimeout;
+    $('#produitsTable_filter input').on('keyup', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            table.search(this.value).draw();
+            updateSelectionInfo();
+        }, 300);
+    });
+    
+    // Mettre à jour l'info au chargement initial
+    setTimeout(updateSelectionInfo, 100);
+});
+
+// Fonction helper pour les boutons de chargement
+function setButtonLoading(button, isLoading, text = null) {
+    if (isLoading) {
+        const originalContent = button.innerHTML;
+        button.dataset.originalContent = originalContent;
+        
+        if (text) {
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + text;
+        } else {
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + originalContent;
+        }
+        button.disabled = true;
+    } else {
+        if (button.dataset.originalContent) {
+            button.innerHTML = button.dataset.originalContent;
+            delete button.dataset.originalContent;
+        }
+        button.disabled = false;
+    }
+}
+
+// Fonction pour afficher les toasts
+function showToast(type, message) {
+    const toastContainer = document.getElementById('toastContainer') || (() => {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(container);
+        return container;
+    })();
+
+    const toastId = 'toast-' + Date.now();
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+
+    toastElement.addEventListener('hidden.bs.toast', function () {
+        toastElement.remove();
+    });
+}
+</script>
+{% endblock %}

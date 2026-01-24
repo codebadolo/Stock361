@@ -1,0 +1,148 @@
+{% load widget_tweaks %}
+
+<form id="produitForm" method="post" enctype="multipart/form-data" action="{{ form_action }}">
+    {% csrf_token %}
+    
+    {% if form.errors %}
+    <div class="alert alert-danger" id="formErrors">
+        <strong>Erreur !</strong> Veuillez corriger les erreurs ci-dessous.
+    </div>
+    {% endif %}
+    
+    <div class="row g-3">
+        <!-- Nom du produit -->
+        <div class="col-md-6">
+            <label for="id_nom" class="form-label fw-semibold">
+                Nom du produit <span class="text-danger">*</span>
+            </label>
+            {{ form.nom|add_class:"form-control"|attr:"required" }}
+            {% if form.nom.errors %}
+            <div class="text-danger small mt-1">{{ form.nom.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Catégorie -->
+        <div class="col-md-6">
+            <label for="id_categorie" class="form-label fw-semibold">Catégorie</label>
+            {{ form.categorie|add_class:"form-select" }}
+            {% if form.categorie.errors %}
+            <div class="text-danger small mt-1">{{ form.categorie.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Prix d'achat -->
+        <div class="col-md-6">
+            <label for="id_prix_achat" class="form-label fw-semibold">Prix d'achat (FCFA)</label>
+            <div class="input-group">
+                {{ form.prix_achat|add_class:"form-control"|attr:"step:0.01" }}
+                <span class="input-group-text">FCFA</span>
+            </div>
+            {% if form.prix_achat.errors %}
+            <div class="text-danger small mt-1">{{ form.prix_achat.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Prix de vente détail -->
+        <div class="col-md-6">
+            <label for="id_prix_vente_detail" class="form-label fw-semibold">
+                Prix de vente détail (FCFA) <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                {{ form.prix_vente_detail|add_class:"form-control"|attr:"required|step:0.01" }}
+                <span class="input-group-text">FCFA</span>
+            </div>
+            {% if form.prix_vente_detail.errors %}
+            <div class="text-danger small mt-1">{{ form.prix_vente_detail.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Prix de vente gros -->
+        <div class="col-md-6">
+            <label for="id_prix_vente_gros" class="form-label fw-semibold">Prix de vente gros (FCFA)</label>
+            <div class="input-group">
+                {{ form.prix_vente_gros|add_class:"form-control"|attr:"step:0.01" }}
+                <span class="input-group-text">FCFA</span>
+            </div>
+            {% if form.prix_vente_gros.errors %}
+            <div class="text-danger small mt-1">{{ form.prix_vente_gros.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Stock minimum -->
+        <div class="col-md-6">
+            <label for="id_stock_minimum" class="form-label fw-semibold">Stock minimum</label>
+            {{ form.stock_minimum|add_class:"form-control" }}
+            {% if form.stock_minimum.errors %}
+            <div class="text-danger small mt-1">{{ form.stock_minimum.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Description -->
+        <div class="col-12">
+            <label for="id_description" class="form-label fw-semibold">Description</label>
+            {{ form.description|add_class:"form-control"|attr:"rows:3" }}
+            {% if form.description.errors %}
+            <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Image -->
+        <div class="col-md-6">
+            <label for="id_image" class="form-label fw-semibold">Image du produit</label>
+            {{ form.image|add_class:"form-control" }}
+            
+            {% if produit and produit.image %}
+            <div class="mt-2">
+                <div class="alert alert-info p-2 small mb-1">
+                    <i class="bi bi-image me-1"></i>
+                    <span>Image actuelle : {{ produit.image.name|truncatechars:30 }}</span>
+                </div>
+                <img src="{{ produit.image.url }}" 
+                     alt="Image actuelle" 
+                     class="img-thumbnail" 
+                     style="max-height: 80px;">
+            </div>
+            {% endif %}
+            {% if form.image.errors %}
+            <div class="text-danger small mt-1">{{ form.image.errors.0 }}</div>
+            {% endif %}
+        </div>
+        
+        <!-- Statut actif -->
+        <div class="col-md-6">
+            <div class="h-100 d-flex flex-column justify-content-center">
+                <div class="form-check form-switch mb-2">
+                    {{ form.est_actif|add_class:"form-check-input" }}
+                    <label class="form-check-label fw-semibold" for="id_est_actif">
+                        Produit actif
+                    </label>
+                </div>
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Si inactif, le produit ne sera pas visible dans les ventes
+                </small>
+                {% if form.est_actif.errors %}
+                <div class="text-danger small mt-1">{{ form.est_actif.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</form>
+
+<style>
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .form-control, .form-select {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.75rem;
+    }
+    
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        margin-right: 0.5rem;
+    }
+</style>

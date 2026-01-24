@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle Vente{% endblock %}
+
+{% block content %}
+<h2>Nouvelle Vente</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="client" class="form-label">Client</label>
+        <select id="client" name="client" class="form-select">
+            <option value="">Client final</option>
+            {% for client in clients %}
+            <option value="{{ client.id }}">{{ client.nom }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <h4>Produits</h4>
+    <table class="table" id="table-produits">
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="ligne-produit">
+                <td>
+                    <select name="produit" class="form-select produit-select">
+                        {% for produit in produits %}
+                        <option value="{{ produit.id }}">{{ produit.nom }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" name="quantite" class="form-control quantite" value="1" min="1"></td>
+                <td><input type="number" step="0.01" name="prix" class="form-control prix" value="0"></td>
+                <td class="total-ligne">0</td>
+                <td><button type="button" class="btn btn-danger btn-sm supprimer-ligne">X</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="button" id="ajouter-ligne" class="btn btn-primary">Ajouter un produit</button>
+    <h4 class="mt-3">Total: <span id="total-general">0</span> FCFA</h4>
+
+    <button type="submit" class="btn btn-success mt-3">Valider la vente</button>
+</form>
+
+<script>
+function calculerTotal() {
+    let total_general = 0;
+    document.querySelectorAll('.ligne-produit').forEach(ligne => {
+        let q = parseFloat(ligne.querySelector('.quantite').value);
+        let p = parseFloat(ligne.querySelector('.prix').value);
+        let total = q * p;
+        ligne.querySelector('.total-ligne').innerText = total.toFixed(2);
+        total_general += total;
+    });
+    document.getElementById('total-general').innerText = total_general.toFixed(2);
+}
+
+document.querySelectorAll('.quantite, .prix').forEach(input => {
+    input.addEventListener('input', calculerTotal);
+});
+
+document.getElementById('ajouter-ligne').addEventListener('click', () => {
+    let table = document.getElementById('table-produits').querySelector('tbody');
+    let nouvelle = table.querySelector('tr').cloneNode(true);
+    table.appendChild(nouvelle);
+    nouvelle.querySelectorAll('input').forEach(i => i.value = 0);
+    calculerTotal();
+    nouvelle.querySelector('.supprimer-ligne').addEventListener('click', () => {
+        nouvelle.remove();
+        calculerTotal();
+    });
+});
+
+document.querySelectorAll('.supprimer-ligne').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.closest('tr').remove();
+        calculerTotal();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block content %}
+
+
+
+<!-- En-tête avec titre et actions -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">
+            <i class="bi bi-people me-2"></i>Gestion des utilisateurs
+        </h1>
+        <p class="text-muted mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Gérez les accès et permissions des utilisateurs du système
+        </p>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{% url 'utilisateur_create' %}" class="btn btn-success">
+            <i class="bi bi-person-plus me-1"></i> Nouvel utilisateur
+        </a>
+        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-download me-1"></i> Exporter
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" id="exportExcel"><i class="bi bi-file-earmark-excel me-2"></i> Excel</a></li>
+            <li><a class="dropdown-item" href="#" id="exportPDF"><i class="bi bi-file-earmark-pdf me-2"></i> PDF</a></li>
+            <li><a class="dropdown-item" href="#" id="exportCSV"><i class="bi bi-file-earmark-text me-2"></i> CSV</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- ====== CARDS DE STATISTIQUES ====== -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-primary shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Total</div>
+                        <div class="h3 mb-0 fw-bold text-primary">{{ total_utilisateurs }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-people-fill fs-2 text-primary opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-person me-1"></i>Utilisateurs actifs
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-danger shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Super Admin</div>
+                        <div class="h3 mb-0 fw-bold text-danger">{{ total_super_admin }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-shield-check fs-2 text-danger opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-person-gear me-1"></i>Administrateurs système
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-warning shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Responsable</div>
+                        <div class="h3 mb-0 fw-bold text-warning">{{ total_responsable }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-badge fs-2 text-warning opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-person-check me-1"></i>Responsables d'entreprise
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-xl-3">
+        <div class="card border-left-success shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase">Gérant/Secrétaire</div>
+                        <div class="h3 mb-0 fw-bold text-success">{{ total_gerant }}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-gear fs-2 text-success opacity-75"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-person-workspace me-1"></i>Gérants & Secrétaires
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== TABLEAU UTILISATEURS ====== -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-table me-2"></i>Liste des utilisateurs
+            </h5>
+            <div class="d-flex gap-2">
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Rechercher..." id="searchInput">
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="utilisateurTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 50px;"></th>
+                        <th>Utilisateur</th>
+                        <th>Contact</th>
+                        <th>Entreprise</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Inscription</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in utilisateurs %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center 
+                                        {% if u.est_super_admin %}bg-danger text-white
+                                        {% elif u.est_responsable %}bg-warning text-white
+                                        {% else %}bg-info text-white{% endif %}"
+                                 style="width:36px; height:36px;">
+                                {{ u.get_full_name|first|upper }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ u.get_full_name }}</div>
+                            <div class="text-muted small">
+                                <i class="bi bi-person me-1"></i>{{ u.username }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if u.email %}
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-envelope text-muted me-2"></i>
+                                    <a href="mailto:{{ u.email }}" class="text-decoration-none small">
+                                        {{ u.email|truncatechars:20 }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if u.telephone %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-telephone text-muted me-2"></i>
+                                    <span class="small">{{ u.telephone }}</span>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.entreprise %}
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-light text-dark me-2"
+                                         style="width:24px; height:24px; font-size:10px;">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ u.entreprise.nom|truncatechars:20 }}</div>
+                                        <div class="text-muted extra-small">
+                                            <i class="bi bi-hash"></i> {{ u.entreprise.ifu|truncatechars:10 }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">
+                                    <i class="bi bi-building-slash me-1"></i>Aucune
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if u.est_super_admin %}bg-danger
+                                {% elif u.est_responsable %}bg-warning
+                                {% else %}bg-info{% endif %}">
+                                <i class="bi 
+                                    {% if u.est_super_admin %}bi-shield-check
+                                    {% elif u.est_responsable %}bi-person-badge
+                                    {% else %}bi-person-gear{% endif %} me-1"></i>
+                                {{ u.get_type_utilisateur_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if u.est_actif %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Actif
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle me-1"></i>Inactif
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ u.date_creation|date:"d/m/Y" }}
+                            </div>
+                            <div class="extra-small text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                {{ u.date_creation|date:"H:i" }}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'utilisateur_detail' u.id %}" 
+                                   class="btn btn-outline-info"
+                                   title="Détails"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'utilisateur_update' u.id %}" 
+                                   class="btn btn-outline-primary"
+                                   title="Modifier"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                {% if request.user.est_super_admin %}
+                                <button type="button" 
+                                        class="btn btn-outline-danger"
+                                        title="Supprimer"
+                                        data-bs-toggle="tooltip"
+                                        onclick="confirmDelete('{{ u.id }}', '{{ u.get_full_name|escapejs }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="text-muted mb-2">
+                                <i class="bi bi-people fs-1"></i>
+                            </div>
+                            <h5 class="text-muted">Aucun utilisateur trouvé</h5>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Commencez par créer un nouvel utilisateur
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ utilisateurs.count }} utilisateur{{ utilisateurs.count|pluralize }} au total
+            </small>
+            <a href="{% url 'utilisateur_create' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-person-plus me-1"></i> Ajouter un utilisateur
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong id="userName"></strong> ?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-octagon me-2"></i>
+                    <strong>Attention !</strong> Cette action est irréversible.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== DATATABLES + STYLES ====== -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+.badge {
+    font-weight: 500;
+}
+.extra-small {
+    font-size: 0.75rem;
+}
+.btn-group .btn {
+    border-radius: 0.25rem !important;
+}
+.border-left-primary { border-left: 4px solid #0d6efd !important; }
+.border-left-danger { border-left: 4px solid #dc3545 !important; }
+.border-left-warning { border-left: 4px solid #ffc107 !important; }
+.border-left-success { border-left: 4px solid #198754 !important; }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialiser DataTable
+    var table = $('#utilisateurTable').DataTable({
+        dom: '<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-md-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
+        paging: true,
+        pageLength: 10,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[6, 'desc']], // Tri par date de création décroissante
+        lengthMenu: [5, 10, 25, 50, 100],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        },
+        columnDefs: [
+            { orderable: false, targets: [0, 7] }, // Désactiver le tri sur avatar et actions
+            { searchable: false, targets: [0, 4, 5, 7] } // Désactiver la recherche sur certaines colonnes
+        ]
+    });
+    
+    // Recherche personnalisée
+    $('#searchInput').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+    
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Bouton rafraîchir
+    $('#refreshTable').click(function() {
+        location.reload();
+    });
+    
+    // Boutons d'export
+    $('#exportExcel').click(function(e) {
+        e.preventDefault();
+        $('.buttons-excel').click();
+    });
+    
+    $('#exportPDF').click(function(e) {
+        e.preventDefault();
+        $('.buttons-pdf').click();
+    });
+    
+    $('#exportCSV').click(function(e) {
+        e.preventDefault();
+        $('.buttons-csv').click();
+    });
+});
+
+// Fonction de confirmation de suppression
+function confirmDelete(userId, userName) {
+    $('#userName').text(userName);
+    $('#deleteForm').attr('action', `/utilisateur/${userId}/delete/`);
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+
+{% endblock %}

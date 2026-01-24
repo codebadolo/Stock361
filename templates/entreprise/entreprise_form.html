@@ -1,0 +1,484 @@
+<!-- templates/entreprise/entreprise_form.html -->
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}{% if form.instance.pk %}Modifier {{ form.instance.nom }}{% else %}Ajouter une entreprise{% endif %}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'entreprise_list' %}"><i class="bi bi-building"></i> Entreprises</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            {% if form.instance.pk %}
+                <i class="bi bi-pencil-square"></i> Modifier
+            {% else %}
+                <i class="bi bi-plus-circle"></i> Ajouter
+            {% endif %}
+        </li>
+    </ol>
+</nav>
+
+<!-- En-tête -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">
+            {% if form.instance.pk %}
+                <i class="bi bi-building me-2"></i>Modifier {{ form.instance.nom }}
+            {% else %}
+                <i class="bi bi-building me-2"></i>Nouvelle entreprise
+            {% endif %}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if form.instance.pk %}
+                Mettez à jour les informations de l'entreprise
+            {% else %}
+                Remplissez les informations pour créer une nouvelle entreprise
+            {% endif %}
+        </p>
+    </div>
+    <a href="{% url 'entreprise_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Retour à la liste
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Carte principale du formulaire -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-card-checklist me-2"></i>
+                    Informations de l'entreprise
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="entrepriseForm">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Section 1 : Informations de base -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Informations principales
+                        </h6>
+                        
+                        <!-- Nom de l'entreprise -->
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">
+                                <i class="bi bi-building me-1"></i>
+                                Nom de l'entreprise *
+                            </label>
+                            {% render_field form.nom class="form-control" placeholder="Entrez le nom de lntreprise" %}
+                            {% if form.nom.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nom.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Le nom officiel de l'entreprise (raison sociale)
+                            </div>
+                        </div>
+                        
+                        <!-- IFU -->
+                        <div class="mb-3">
+                            <label for="{{ form.ifu.id_for_label }}" class="form-label">
+                                <i class="bi bi-hash me-1"></i>
+                                IFU (Identifiant Fiscal Unique) *
+                            </label>
+                            {% render_field form.ifu class="form-control" placeholder="Ex: IFU1234567890123" %}
+                            {% if form.ifu.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.ifu.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                L'identifiant fiscal unique de l'entreprise
+                            </div>
+                        </div>
+                        
+                        <!-- Contact -->
+                        <div class="mb-3">
+                            <label for="{{ form.contact.id_for_label }}" class="form-label">
+                                <i class="bi bi-telephone me-1"></i>
+                                Contact téléphonique
+                            </label>
+                            {% render_field form.contact class="form-control" placeholder="Ex: +229 XX XX XX XX" %}
+                            {% if form.contact.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.contact.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Numéro de téléphone principal de l'entreprise
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 2 : Logo -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-image me-2"></i>
+                            Logo de l'entreprise
+                        </h6>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.logo.id_for_label }}" class="form-label">
+                                <i class="bi bi-upload me-1"></i>
+                                Logo
+                            </label>
+                            
+                            <!-- Prévisualisation du logo existant -->
+                            {% if form.instance.logo %}
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ form.instance.logo.url }}" 
+                                         alt="Logo actuel" 
+                                         class="rounded me-3"
+                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                    <div>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-check-circle me-1"></i>Logo actuel
+                                        </span>
+                                        <div class="small text-muted mt-1">
+                                            Téléchargez un nouveau logo pour remplacer celui-ci
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Champ de fichier -->
+                            <div class="input-group">
+                                {% render_field form.logo class="form-control" accept="image/*" %}
+                                <label class="input-group-text" for="{{ form.logo.id_for_label }}">
+                                    <i class="bi bi-folder2-open"></i>
+                                </label>
+                            </div>
+                            
+                            {% if form.logo.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.logo.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="form-text">
+                                Format recommandé : PNG ou JPG, 200x200px maximum
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 3 : Statut -->
+                    <div class="mb-4">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-gear me-2"></i>
+                            Configuration
+                        </h6>
+                        
+                        <!-- Statut actif -->
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                {% render_field form.est_actif class="form-check-input" role="switch" %}
+                                <label class="form-check-label" for="{{ form.est_actif.id_for_label }}">
+                                    <i class="bi bi-toggle-on me-1"></i>
+                                    Entreprise active
+                                </label>
+                            </div>
+                            {% if form.est_actif.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.est_actif.errors %}
+                                    <i class="bi bi-x-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Désactivez pour archiver l'entreprise
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% url 'entreprise_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-1"></i> Annuler
+                        </a>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    <i class="bi bi-check-circle me-1"></i> Mettre à jour
+                                {% else %}
+                                    <i class="bi bi-plus-circle me-1"></i> Créer l'entreprise
+                                {% endif %}
+                            </button>
+                            {% if form.instance.pk %}
+                            <a href="{% url 'entreprise_detail' form.instance.pk %}" class="btn btn-outline-info">
+                                <i class="bi bi-eye me-1"></i> Voir détails
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Colonne droite : Informations et conseils -->
+    <div class="col-lg-4">
+        <!-- Carte d'information -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Informations importantes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Champs obligatoires</strong>
+                    <p class="mb-0 mt-2">
+                        Les champs marqués d'un * sont obligatoires pour créer une entreprise.
+                    </p>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-shield-check me-2"></i>
+                    <strong>Sécurité des données</strong>
+                    <p class="mb-0 mt-2">
+                        L'IFU doit être unique pour chaque entreprise. Vérifiez qu'il n'existe pas déjà.
+                    </p>
+                </div>
+                
+                <h6 class="fw-bold mt-4">
+                    <i class="bi bi-question-circle me-2"></i>
+                    À propos de l'IFU
+                </h6>
+                <ul class="list-unstyled small text-muted">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Format standard : 13 caractères
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Attribué par les autorités fiscales
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Obligatoire pour toutes les entreprises
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Carte de prévisualisation -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-eye me-2"></i>
+                    Aperçu
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <div id="logoPreview" class="mb-3">
+                        {% if form.instance.logo %}
+                            <img src="{{ form.instance.logo.url }}" 
+                                 class="rounded shadow-sm"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <div class="avatar-placeholder rounded d-flex align-items-center justify-content-center mx-auto bg-light border"
+                                 style="width: 120px; height: 120px;">
+                                <i class="bi bi-building fs-1 text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="text-center">
+                        <h6 id="previewName" class="fw-bold mb-1">
+                            {% if form.instance.nom %}
+                                {{ form.instance.nom }}
+                            {% else %}
+                                Nom de l'entreprise
+                            {% endif %}
+                        </h6>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-hash"></i>
+                            <span id="previewIfu">
+                                {% if form.instance.ifu %}
+                                    {{ form.instance.ifu }}
+                                {% else %}
+                                    IFU1234567890123
+                                {% endif %}
+                            </span>
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-telephone"></i>
+                            <span id="previewContact">
+                                {% if form.instance.contact %}
+                                    {{ form.instance.contact }}
+                                {% else %}
+                                    +229 XX XX XX XX
+                                {% endif %}
+                            </span>
+                        </p>
+                        <div class="mt-2">
+                            <span class="badge bg-{% if form.instance.est_actif %}success{% else %}danger{% endif %}">
+                                <i class="bi bi-circle-fill me-1"></i>
+                                {% if form.instance.est_actif or not form.instance.pk %}
+                                    Actif
+                                {% else %}
+                                    Inactif
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+.form-switch .form-check-input {
+    height: 1.5em;
+    width: 3em;
+}
+.form-switch .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.invalid-feedback {
+    display: block;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise à jour en temps réel de l'aperçu
+    const nomInput = document.querySelector('#{{ form.nom.id_for_label }}');
+    const ifuInput = document.querySelector('#{{ form.ifu.id_for_label }}');
+    const contactInput = document.querySelector('#{{ form.contact.id_for_label }}');
+    const logoInput = document.querySelector('#{{ form.logo.id_for_label }}');
+    const activeSwitch = document.querySelector('#{{ form.est_actif.id_for_label }}');
+    
+    // Mettre à jour l'aperçu du nom
+    if (nomInput) {
+        nomInput.addEventListener('input', function() {
+            const previewName = document.getElementById('previewName');
+            previewName.textContent = this.value || 'Nom de l\'entreprise';
+        });
+    }
+    
+    // Mettre à jour l'aperçu de l'IFU
+    if (ifuInput) {
+        ifuInput.addEventListener('input', function() {
+            const previewIfu = document.getElementById('previewIfu');
+            previewIfu.textContent = this.value || 'IFU1234567890123';
+        });
+    }
+    
+    // Mettre à jour l'aperçu du contact
+    if (contactInput) {
+        contactInput.addEventListener('input', function() {
+            const previewContact = document.getElementById('previewContact');
+            previewContact.textContent = this.value || '+229 XX XX XX XX';
+        });
+    }
+    
+    // Prévisualisation du logo
+    if (logoInput) {
+        logoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoPreview = document.getElementById('logoPreview');
+                    logoPreview.innerHTML = `
+                        <img src="${e.target.result}" 
+                             class="rounded shadow-sm"
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Mettre à jour le badge d'état
+    if (activeSwitch) {
+        activeSwitch.addEventListener('change', function() {
+            const statusBadge = document.querySelector('.badge.bg-success, .badge.bg-danger');
+            if (this.checked) {
+                statusBadge.className = 'badge bg-success';
+                statusBadge.innerHTML = '<i class="bi bi-circle-fill me-1"></i>Actif';
+            } else {
+                statusBadge.className = 'badge bg-danger';
+                statusBadge.innerHTML = '<i class="bi bi-circle-fill me-1"></i>Inactif';
+            }
+        });
+    }
+    
+    // Validation du formulaire
+    const form = document.getElementById('entrepriseForm');
+    form.addEventListener('submit', function(e) {
+        const nom = nomInput ? nomInput.value.trim() : '';
+        const ifu = ifuInput ? ifuInput.value.trim() : '';
+        
+        if (!nom) {
+            e.preventDefault();
+            alert('Le nom de l\'entreprise est obligatoire');
+            return false;
+        }
+        
+        if (!ifu) {
+            e.preventDefault();
+            alert('L\'IFU est obligatoire');
+            return false;
+        }
+        
+        // Validation de la longueur de l'IFU (exemple)
+        if (ifu.length < 10) {
+            e.preventDefault();
+            alert('L\'IFU semble trop court. Vérifiez le format.');
+            return false;
+        }
+    });
+});
+</script>
+
+{% endblock %}

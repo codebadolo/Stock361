@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Catégories{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'produit:produit_list' %}">Produits</a></li>
+    <li class="breadcrumb-item active">Catégories</li>
+  </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-tags"></i> Catégories de produits
+    </h2>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategorieModal">
+        <i class="bi bi-plus-circle"></i> Nouvelle catégorie
+    </button>
+</div>
+
+<!-- Cards de stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Total catégories</h6>
+                <h3 class="fw-bold text-primary">{{ object_list.count }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Catégorie parente</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categorie in object_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <strong>{{ categorie.nom }}</strong>
+                        </td>
+                        <td>
+                            {% if categorie.parent %}
+                                <span class="badge bg-light text-dark">{{ categorie.parent.nom }}</span>
+                            {% else %}
+                                <span class="text-muted fst-italic">Aucune</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button type="button" 
+                                    class="btn btn-sm btn-warning" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editCategorieModal"
+                                    data-categorie-id="{{ categorie.id }}"
+                                    data-categorie-nom="{{ categorie.nom }}"
+                                    data-categorie-parent="{{ categorie.parent.id|default:'' }}">
+                                <i class="bi bi-pencil-square"></i> Modifier
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger ms-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteCategorieModal"
+                                    data-categorie-id="{{ categorie.id }}"
+                                    data-categorie-nom="{{ categorie.nom }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                            Aucune catégorie enregistrée
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Modal pour créer une catégorie -->
+<div class="modal fade" id="createCategorieModal" tabindex="-1" aria-labelledby="createCategorieModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCategorieModalLabel">
+                    <i class="bi bi-plus-circle me-2"></i>Nouvelle catégorie
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'produit:categorie_create_ajax' %}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="create-nom" class="form-label">Nom de la catégorie</label>
+                        <input type="text" class="form-control" id="create-nom" name="nom" required>
+                        <div class="form-text">Le nom doit être unique.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="create-parent" class="form-label">Catégorie parente</label>
+                        <select class="form-select" id="create-parent" name="parent">
+                            <option value="">Aucune (catégorie racine)</option>
+                            {% for cat in object_list %}
+                                <option value="{{ cat.id }}">{{ cat.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i> Créer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier une catégorie -->
+<div class="modal fade" id="editCategorieModal" tabindex="-1" aria-labelledby="editCategorieModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategorieModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i>Modifier la catégorie
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="" id="editCategorieForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit-nom" class="form-label">Nom de la catégorie</label>
+                        <input type="text" class="form-control" id="edit-nom" name="nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-parent" class="form-label">Catégorie parente</label>
+                        <select class="form-select" id="edit-parent" name="parent">
+                            <option value="">Aucune (catégorie racine)</option>
+                            {% for cat in object_list %}
+                                <option value="{{ cat.id }}">{{ cat.nom }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Attention : ne pas sélectionner une catégorie enfant comme parent.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour supprimer une catégorie -->
+<div class="modal fade" id="deleteCategorieModal" tabindex="-1" aria-labelledby="deleteCategorieModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCategorieModalLabel">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer la catégorie <strong id="delete-categorie-nom"></strong> ?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Cette action est irréversible. Les produits associés seront conservés mais sans catégorie.
+                </div>
+            </div>
+          
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de l'édition
+    var editCategorieModal = document.getElementById('editCategorieModal');
+    if (editCategorieModal) {
+        editCategorieModal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var categorieId = button.getAttribute('data-categorie-id');
+            var categorieNom = button.getAttribute('data-categorie-nom');
+            var categorieParent = button.getAttribute('data-categorie-parent');
+            
+            // Mettre à jour le formulaire
+            var modalTitle = editCategorieModal.querySelector('.modal-title');
+            var form = editCategorieModal.querySelector('#editCategorieForm');
+            var nomInput = editCategorieModal.querySelector('#edit-nom');
+            var parentSelect = editCategorieModal.querySelector('#edit-parent');
+            
+            modalTitle.textContent = 'Modifier : ' + categorieNom;
+            form.action = "{% url 'produit:categorie_update_ajax' 0 %}".replace('0', categorieId);
+            nomInput.value = categorieNom;
+            
+            // Sélectionner le parent
+            if (categorieParent) {
+                parentSelect.value = categorieParent;
+            } else {
+                parentSelect.value = '';
+            }
+            
+            // Désactiver l'option de la catégorie elle-même
+            Array.from(parentSelect.options).forEach(option => {
+                if (option.value === categorieId) {
+                    option.disabled = true;
+                    option.textContent += ' (cette catégorie)';
+                }
+            });
+        });
+        
+        // Réinitialiser le select quand le modal se ferme
+        editCategorieModal.addEventListener('hidden.bs.modal', function() {
+            var parentSelect = this.querySelector('#edit-parent');
+            Array.from(parentSelect.options).forEach(option => {
+                option.disabled = false;
+                if (option.textContent.includes(' (cette catégorie)')) {
+                    option.textContent = option.textContent.replace(' (cette catégorie)', '');
+                }
+            });
+        });
+    }
+    
+    
+    
+    // Gestion de la création (validation côté client)
+    var createForm = document.querySelector('#createCategorieModal form');
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            var nomInput = document.getElementById('create-nom');
+            if (nomInput.value.trim() === '') {
+                e.preventDefault();
+                nomInput.classList.add('is-invalid');
+                return false;
+            }
+        });
+    }
+    
+    // Gestion des formulaires AJAX (si vous utilisez AJAX pour soumettre)
+    var editForm = document.getElementById('editCategorieForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            var nomInput = document.getElementById('edit-nom');
+            if (nomInput.value.trim() === '') {
+                e.preventDefault();
+                nomInput.classList.add('is-invalid');
+                return false;
+            }
+        });
+    }
+});
+</script>
+
+<style>
+/* Style pour les boutons d'action */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Animation pour les modals */
+.modal.fade .modal-dialog {
+    transform: translate(0, -50px);
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: translate(0, 0);
+}
+
+/* Style pour la table */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+</style>
+{% endblock %}

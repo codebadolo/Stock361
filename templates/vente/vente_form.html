@@ -1,0 +1,1269 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}POS – Nouvelle vente{% endblock %}
+
+{% block content %}
+
+<style>
+:root {
+    --primary-color: #4361ee;
+    --success-color: #06d6a0;
+    --warning-color: #ffb703;
+    --danger-color: #ef476f;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --border-color: #e0e0e0;
+    --text-light: #6b7280;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --radius: 8px;
+}
+
+/* Layout Principal */
+.pos-container {
+    display: flex;
+    height: calc(100vh - 100px);
+    gap: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+/* Section Produits */
+.products-section {
+    flex: 0 0 65%;
+    background: white;
+    border-radius: var(--radius);
+    padding: 15px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Section Panier */
+.cart-section {
+    flex: 0 0 35%;
+    background: white;
+    border-radius: var(--radius);
+    padding: 15px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Barre de recherche */
+.search-bar {
+    margin-bottom: 15px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+/* Liste des produits */
+.products-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 5px;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s;
+    gap: 12px;
+}
+
+.product-item:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.product-item.out-of-stock {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.product-item.low-stock {
+    border-left: 3px solid var(--warning-color);
+}
+
+.product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+    background: white;
+    border: 1px solid #dee2e6;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 14px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-description {
+    font-size: 12px;
+    color: #6c757d;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stock-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.stock-good {
+    background: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.stock-low {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.stock-none {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.product-price {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+.add-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.add-btn:hover {
+    background: #3a56d4;
+    transform: scale(1.05);
+}
+
+.add-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Panier */
+.cart-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 15px;
+}
+
+.cart-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 18px;
+}
+
+.cart-count {
+    background: var(--primary-color);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Sélection Client */
+.client-section {
+    margin-bottom: 15px;
+}
+
+.client-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 14px;
+    display: block;
+}
+
+.client-select-container {
+    display: flex;
+    gap: 8px;
+}
+
+.client-select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.client-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.add-client-btn {
+    padding: 8px 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.add-client-btn:hover {
+    background: #3a56d4;
+}
+
+/* Articles du panier */
+.cart-items {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 5px;
+}
+
+.cart-item {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.cart-item:hover {
+    background: #e9ecef;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.item-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-subtotal {
+    font-weight: 600;
+    color: var(--success-color);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: #e9ecef;
+}
+
+.qty-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qty-input {
+    width: 40px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.qty-input:focus {
+    outline: none;
+}
+
+.price-input {
+    width: 80px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.price-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.remove-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.remove-btn:hover {
+    background: #bb2d3b;
+}
+
+/* Panier vide */
+.empty-cart {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-cart-icon {
+    font-size: 48px;
+    color: #adb5bd;
+    margin-bottom: 15px;
+}
+
+.empty-cart h5 {
+    color: #6c757d;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.empty-cart p {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Total */
+.cart-total {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.total-label {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.total-amount {
+    color: var(--dark-color);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Bouton de validation */
+.checkout-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.checkout-btn:hover:not(:disabled) {
+    background: #05c895;
+    transform: translateY(-1px);
+}
+
+.checkout-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Messages d'alerte */
+.alert-container {
+    margin-bottom: 15px;
+}
+
+.alert {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.alert-success {
+    background: #d1e7dd;
+    color: #0f5132;
+    border-color: #badbcc;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pos-container {
+        flex-direction: column;
+        height: auto;
+        gap: 15px;
+    }
+    
+    .products-section,
+    .cart-section {
+        width: 100%;
+        flex: none;
+    }
+    
+    .products-section {
+        height: 60vh;
+    }
+    
+    .cart-section {
+        height: 40vh;
+    }
+    
+    .client-select-container {
+        flex-direction: column;
+    }
+    
+    .add-client-btn {
+        width: 100%;
+    }
+    
+    .item-controls {
+        justify-content: space-between;
+    }
+}
+</style>
+
+<div class="container-fluid">
+    <div class="alert-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {% if message.tags == 'success' %}
+                    <i class="bi bi-check-circle-fill"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                {% elif message.tags == 'warning' %}
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                {% else %}
+                    <i class="bi bi-info-circle-fill"></i>
+                {% endif %}
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    <div class="pos-container">
+        <!-- SECTION PRODUITS -->
+        <div class="products-section">
+            <div class="search-bar">
+                <input type="text" id="search" class="search-input" placeholder="Rechercher un produit...">
+            </div>
+            
+            <div class="products-list" id="productList">
+                {% for p in produits %}
+                {% with stock=p.stock.quantite|default:0 %}
+                <div class="product-item {% if stock <= 0 %}out-of-stock{% elif stock <= 5 %}low-stock{% endif %}"
+                     data-id="{{ p.id }}"
+                     data-nom="{{ p.nom }}"
+                     data-prix="{{ p.prix_vente_detail }}"
+                     data-stock="{{ stock }}"
+                     data-desc="{{ p.description|default:'' }}"
+                     data-cat="{{ p.categorie.nom|default:'Non catégorisé' }}">
+                    
+                    {% if p.image %}
+                    <img src="{{ p.image.url }}" class="product-image" alt="{{ p.nom }}">
+                    {% else %}
+                    <div class="product-image d-flex align-items-center justify-content-center bg-light">
+                        <i class="bi bi-box text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="product-info">
+                        <div class="product-name">{{ p.nom }}</div>
+                        
+                        {% if p.description %}
+                        <div class="product-description">{{ p.description }}</div>
+                        {% endif %}
+                        
+                        <div class="product-meta">
+                            <span class="stock-info {% if stock > 10 %}stock-good{% elif stock > 0 %}stock-low{% else %}stock-none{% endif %}">
+                                <i class="bi {% if stock > 10 %}bi-check-circle{% elif stock > 0 %}bi-exclamation-triangle{% else %}bi-x-circle{% endif %}"></i>
+                                {% if stock > 10 %}
+                                    {{ stock }} en stock
+                                {% elif stock > 0 %}
+                                    {{ stock }} restants
+                                {% else %}
+                                    Rupture
+                                {% endif %}
+                            </span>
+                            
+                            <span class="product-price">{{ p.prix_vente_detail|floatformat:0 }} FCFA</span>
+                        </div>
+                    </div>
+                    
+                    <button class="add-btn" 
+                            onclick="addToCart(this)"
+                            {% if stock <= 0 %}disabled{% endif %}
+                            title="{% if stock <= 0 %}Produit en rupture de stock{% else %}Ajouter au panier{% endif %}">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                {% endwith %}
+                {% empty %}
+                <div class="empty-cart">
+                    <i class="bi bi-box-seam empty-cart-icon"></i>
+                    <h5>Aucun produit disponible</h5>
+                    <p>Veuillez ajouter des produits en stock</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- SECTION PANIER -->
+        <div class="cart-section">
+            <div class="cart-header">
+                <div class="cart-title">
+                    <i class="bi bi-cart3"></i>
+                    <span>Panier</span>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+            </div>
+            
+            <div class="client-section">
+                <label class="client-label">Sélectionner un client</label>
+                <div class="client-select-container">
+                    <select name="client" id="client" class="client-select">
+                        <option value="">-- Client comptant --</option>
+                        {% for c in clients %}
+                        <option value="{{ c.id }}">{{ c.nom }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="add-client-btn" onclick="openClientModal()">
+                        <i class="bi bi-person-plus"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cart-items" id="cart">
+                <div class="empty-cart" id="emptyCart">
+                    <i class="bi bi-cart empty-cart-icon"></i>
+                    <h5>Votre panier est vide</h5>
+                    <p>Sélectionnez des produits pour commencer</p>
+                </div>
+            </div>
+            
+            <div class="cart-total">
+                <div class="total-label">TOTAL À PAYER</div>
+                <div class="total-amount" id="total">0 FCFA</div>
+            </div>
+            
+            <form method="post" id="posForm">
+                {% csrf_token %}
+                <input type="hidden" name="cart_data" id="cartData" value="">
+                <input type="hidden" name="total_amount" id="totalAmount" value="0">
+                
+                <button type="submit" class="checkout-btn" id="checkoutBtn" disabled>
+                    <i class="bi bi-save"></i>
+                    <span>Enregistrer la vente</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour nouveau client -->
+<div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Ajouter un nouveau client
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="clientForm">
+                    <div class="mb-3">
+                        <label for="newClientNom" class="form-label">Nom complet *</label>
+                        <input type="text" id="newClientNom" class="form-control" 
+                               placeholder="Ex: Jean Dupont" required>
+                        <div class="invalid-feedback" id="nomError">Veuillez saisir le nom du client</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="newClientContact" class="form-label">Téléphone (optionnel)</label>
+                        <input type="tel" id="newClientContact" class="form-control" 
+                               placeholder="Ex: +225 07 00 00 00 00">
+                    </div>
+                </form>
+                
+                <div id="clientModalMessage" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x me-1"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-primary" id="saveClientBtn" onclick="saveClient()">
+                    <i class="bi bi-check me-1"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// VARIABLES GLOBALES
+// ============================================
+let cart = [];
+
+// ============================================
+// FONCTIONS DE BASE
+// ============================================
+
+// Ajouter un produit au panier
+function addToCart(button) {
+    console.log('addToCart appelé');
+    
+    if (button.disabled) {
+        console.log('Bouton désactivé');
+        return;
+    }
+    
+    const productItem = button.closest('.product-item');
+    const productId = productItem.dataset.id;
+    const productName = productItem.dataset.nom;
+    const productPrice = parseFloat(productItem.dataset.prix);
+    const currentStock = parseInt(productItem.dataset.stock);
+    
+    console.log('Produit:', productName, 'ID:', productId, 'Prix:', productPrice, 'Stock:', currentStock);
+    
+    if (currentStock <= 0) {
+        alert('Ce produit est en rupture de stock');
+        return;
+    }
+    
+    // Chercher si le produit est déjà dans le panier
+    const existingItem = cart.find(item => item.id === productId);
+    
+    if (existingItem) {
+        // Vérifier le stock
+        if (existingItem.qte + 1 > currentStock) {
+            alert(`Stock insuffisant! Il reste ${currentStock} unités disponibles`);
+            return;
+        }
+        existingItem.qte += 1;
+        console.log('Quantité mise à jour:', existingItem.qte);
+    } else {
+        // Ajouter un nouvel élément
+        cart.push({
+            id: productId,
+            nom: productName,
+            prix: productPrice,
+            availableStock: currentStock,
+            qte: 1
+        });
+        console.log('Nouveau produit ajouté au panier');
+    }
+    
+    refreshCart();
+    
+    // Feedback visuel
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-check"></i>';
+    button.style.background = '#06d6a0';
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.background = '';
+    }, 500);
+}
+
+// Rafraîchir l'affichage du panier
+function refreshCart() {
+    console.log('refreshCart appelé, cart:', cart);
+    
+    const cartDiv = document.getElementById('cart');
+    const cartCount = document.getElementById('cartCount');
+    const totalElement = document.getElementById('total');
+    const totalAmountElement = document.getElementById('totalAmount');
+    const cartDataElement = document.getElementById('cartData');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const clientSelect = document.getElementById('client');
+    
+    let total = 0;
+    
+    if (cart.length > 0) {
+        let cartHTML = '';
+        
+        cart.forEach((item, index) => {
+            const lineTotal = item.qte * item.prix;
+            total += lineTotal;
+            
+            cartHTML += `
+            <div class="cart-item">
+                <div class="item-header">
+                    <div class="item-name">${item.nom}</div>
+                    <div class="item-subtotal">${lineTotal.toLocaleString('fr-FR')} FCFA</div>
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(${index}, ${item.qte - 1})" ${item.qte <= 1 ? 'disabled' : ''}>
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <input type="number" class="qty-input" value="${item.qte}" min="1" max="${item.availableStock}" 
+                               onchange="updateQuantity(${index}, this.value)">
+                        <button class="qty-btn" onclick="updateQuantity(${index}, ${item.qte + 1})" ${item.qte >= item.availableStock ? 'disabled' : ''}>
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <input type="number" class="price-input" value="${item.prix}" 
+                           onchange="updatePrice(${index}, this.value)" min="0" step="50">
+                    <button class="remove-btn" onclick="removeFromCart(${index})" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            `;
+        });
+        
+        cartDiv.innerHTML = cartHTML;
+        checkoutBtn.disabled = false;
+        console.log('Panier affiché avec', cart.length, 'articles');
+    } else {
+        cartDiv.innerHTML = `
+        <div class="empty-cart">
+            <i class="bi bi-cart empty-cart-icon"></i>
+            <h5>Votre panier est vide</h5>
+            <p>Sélectionnez des produits pour commencer</p>
+        </div>
+        `;
+        checkoutBtn.disabled = true;
+        console.log('Panier vide affiché');
+    }
+    
+    // Mettre à jour les totaux
+    cartCount.textContent = cart.length;
+    totalElement.textContent = total.toLocaleString('fr-FR') + ' FCFA';
+    totalAmountElement.value = total;
+    
+    // Mettre à jour les données du formulaire
+    const cartData = cart.map(item => ({
+        produit_id: item.id,
+        quantite: item.qte,
+        prix_unitaire: item.prix
+    }));
+    cartDataElement.value = JSON.stringify(cartData);
+    console.log('Données cart mises à jour:', cartDataElement.value);
+    
+    // Afficher le client sélectionné
+    console.log('Client sélectionné:', clientSelect.value);
+}
+
+// Mettre à jour la quantité d'un article
+function updateQuantity(index, newQuantity) {
+    console.log('updateQuantity appelé:', index, newQuantity);
+    
+    newQuantity = parseInt(newQuantity);
+    if (isNaN(newQuantity) || newQuantity < 1) newQuantity = 1;
+    
+    const item = cart[index];
+    
+    if (newQuantity > item.availableStock) {
+        alert(`Stock insuffisant! Il reste ${item.availableStock} unités disponibles`);
+        newQuantity = item.availableStock;
+    }
+    
+    cart[index].qte = newQuantity;
+    refreshCart();
+}
+
+// Mettre à jour le prix d'un article
+function updatePrice(index, newPrice) {
+    console.log('updatePrice appelé:', index, newPrice);
+    
+    newPrice = parseFloat(newPrice);
+    if (isNaN(newPrice) || newPrice < 0) newPrice = 0;
+    cart[index].prix = newPrice;
+    refreshCart();
+}
+
+// Supprimer un article du panier
+function removeFromCart(index) {
+    console.log('removeFromCart appelé:', index);
+    
+    if (confirm('Voulez-vous vraiment supprimer cet article du panier ?')) {
+        cart.splice(index, 1);
+        refreshCart();
+    }
+}
+
+// ============================================
+// FONCTIONS CLIENTS
+// ============================================
+
+// ============================================
+// FONCTIONS CLIENTS
+// ============================================
+
+// Ouvrir le modal pour ajouter un client
+function openClientModal() {
+    console.log('openClientModal appelé');
+    
+    // Réinitialiser le formulaire
+    document.getElementById('clientForm').reset();
+    document.getElementById('clientModalMessage').innerHTML = '';
+    
+    // Enlever les classes d'erreur
+    const inputs = document.querySelectorAll('#clientForm .form-control');
+    inputs.forEach(input => {
+        input.classList.remove('is-invalid');
+    });
+    
+    // Ouvrir le modal
+    const modal = new bootstrap.Modal(document.getElementById('clientModal'));
+    modal.show();
+}
+
+// Sauvegarder un nouveau client (AJAX)
+async function saveClient() {
+    console.log('saveClient appelé');
+    
+    const nom = document.getElementById('newClientNom').value.trim();
+    const contact = document.getElementById('newClientContact').value.trim();
+    const messageDiv = document.getElementById('clientModalMessage');
+    
+    console.log('Données client:', { nom, contact });
+    
+    // Validation
+    let isValid = true;
+    
+    if (!nom) {
+        document.getElementById('newClientNom').classList.add('is-invalid');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        messageDiv.innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Veuillez saisir le nom du client.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        `;
+        return;
+    }
+    
+    // Désactiver le bouton pendant l'envoi
+    const saveBtn = document.getElementById('saveClientBtn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Enregistrement...';
+    saveBtn.disabled = true;
+    
+    try {
+        // Récupérer le token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        console.log('CSRF Token:', csrfToken);
+        
+        // Préparer les données
+        const formData = new FormData();
+        formData.append('nom', nom);
+        formData.append('contact', contact);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        console.log('Envoi AJAX...');
+        
+        // Envoyer la requête
+        const response = await fetch('{% url "client_create_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        console.log('Réponse AJAX:', data);
+        
+        if (data.success) {
+            // Ajouter le client à la liste déroulante
+            const select = document.getElementById('client');
+            const option = document.createElement('option');
+            option.value = data.id;
+            option.textContent = data.nom + (contact ? ' (' + contact + ')' : '');
+            select.appendChild(option);
+            select.value = data.id; // IMPORTANT: Sélectionner automatiquement le nouveau client
+            
+            console.log('Client ajouté à la liste, ID:', data.id);
+            
+            // Afficher un message de succès
+            messageDiv.innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                Client ajouté avec succès!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            `;
+            
+            // Fermer le modal après 2 secondes
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                if (modal) {
+                    modal.hide();
+                    console.log('Modal fermé');
+                }
+            }, 2000);
+            
+        } else {
+            // Afficher l'erreur
+            console.error('Erreur AJAX:', data.error);
+            messageDiv.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                ${data.error || 'Erreur lors de l\'ajout du client'}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Erreur réseau:', error);
+        messageDiv.innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Erreur réseau: ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        `;
+    } finally {
+        // Réactiver le bouton
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        console.log('Bouton réactivé');
+    }
+}
+
+// ============================================
+// GESTION DU FORMULAIRE DE VENTE
+// ============================================
+
+// Gestion de l'envoi du formulaire
+document.getElementById('posForm').addEventListener('submit', function(e) {
+    console.log('Formulaire en cours de soumission...');
+    console.log('Nombre d\'articles:', cart.length);
+    
+    const clientSelect = document.getElementById('client');
+    console.log('Client sélectionné:', clientSelect.value);
+    
+    // Récupérer tous les champs du formulaire pour débogage
+    const formData = new FormData(this);
+    console.log('FormData:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key, ':', value);
+    }
+    
+    if (cart.length === 0) {
+        e.preventDefault();
+        alert('Le panier est vide. Ajoutez des produits avant d\'enregistrer.');
+        return;
+    }
+    
+    // Vérifier le client
+    if (!clientSelect.value || clientSelect.value === '') {
+        if (!confirm('Aucun client sélectionné. Continuer avec "Client comptant" ?')) {
+            e.preventDefault();
+            return;
+        }
+    }
+    
+    console.log('Formulaire validé, envoi au serveur...');
+});
+
+// ============================================
+// AJOUTER UN CHAMP CACHÉ POUR LE CLIENT
+// ============================================
+
+// Ajouter un champ caché pour s'assurer que le client est bien envoyé
+function addHiddenClientField() {
+    const form = document.getElementById('posForm');
+    let hiddenField = document.getElementById('clientHidden');
+    
+    if (!hiddenField) {
+        hiddenField = document.createElement('input');
+        hiddenField.type = 'hidden';
+        hiddenField.name = 'client';
+        hiddenField.id = 'clientHidden';
+        form.appendChild(hiddenField);
+    }
+    
+    const clientSelect = document.getElementById('client');
+    hiddenField.value = clientSelect.value;
+}
+
+// Mettre à jour le champ caché quand la sélection change
+document.getElementById('client').addEventListener('change', function() {
+    console.log('Client sélectionné changé:', this.value);
+    addHiddenClientField();
+});
+
+// Mettre à jour le champ caché avant soumission
+document.getElementById('posForm').addEventListener('submit', function() {
+    addHiddenClientField();
+});
+
+// ============================================
+// INITIALISATION
+// ============================================
+
+// Initialiser au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page chargée, initialisation...');
+    
+    // Ajouter le champ caché pour le client
+    addHiddenClientField();
+    
+    // Initialiser le panier
+    refreshCart();
+    
+    // Déboguer la liste des clients
+    const clientSelect = document.getElementById('client');
+    console.log('Clients disponibles:', clientSelect.options.length);
+    
+    // S'assurer que le formulaire a le bon encoding
+    document.getElementById('posForm').setAttribute('enctype', 'application/x-www-form-urlencoded');
+});
+// ============================================
+// ÉVÉNEMENTS
+// ============================================
+
+// Recherche de produits
+document.getElementById('search').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    console.log('Recherche:', searchTerm);
+    
+    const productItems = document.querySelectorAll('.product-item');
+    
+    productItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (searchTerm === '' || text.includes(searchTerm)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Gestion de l'envoi du formulaire
+document.getElementById('posForm').addEventListener('submit', function(e) {
+    console.log('Formulaire en cours de soumission...');
+    console.log('Nombre d\'articles:', cart.length);
+    
+    const clientSelect = document.getElementById('client');
+    console.log('Client sélectionné:', clientSelect.value);
+    
+    if (cart.length === 0) {
+        e.preventDefault();
+        alert('Le panier est vide. Ajoutez des produits avant d\'enregistrer.');
+        return;
+    }
+    
+    // Vérifier le client
+    if (!clientSelect.value || clientSelect.value === '') {
+        if (!confirm('Aucun client sélectionné. Continuer avec "Client comptant" ?')) {
+            e.preventDefault();
+            return;
+        }
+    }
+    
+    console.log('Formulaire validé, envoi au serveur...');
+});
+
+// ============================================
+// INITIALISATION
+// ============================================
+
+// Initialiser au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page chargée, initialisation...');
+    refreshCart();
+    
+    // Déboguer la liste des clients
+    const clientSelect = document.getElementById('client');
+    console.log('Clients disponibles:', clientSelect.options.length);
+});
+
+// Fonction de débogage
+window.debugCart = function() {
+    console.log('=== DEBUG CART ===');
+    console.log('Cart:', cart);
+    console.log('Client select value:', document.getElementById('client').value);
+    console.log('Cart data:', document.getElementById('cartData').value);
+    console.log('Total:', document.getElementById('totalAmount').value);
+};
+</script>
+
+{% endblock %}

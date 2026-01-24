@@ -1,0 +1,35 @@
+<nav class="sidebar d-flex flex-column p-3">
+    <a href="{% url 'dashboard' %}" class="navbar-brand mb-4 text-white">Stock361</a>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="{% url 'dashboard' %}" class="nav-link text-white">
+                <i class="fa fa-tachometer-alt"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'produit_list' %}" class="nav-link text-white">
+                <i class="fa fa-boxes"></i> Produits
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'stock_boutique' %}" class="nav-link text-white">
+                <i class="fa fa-warehouse"></i> Stock
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'vente_list' %}" class="nav-link text-white">
+                <i class="fa fa-shopping-cart"></i> Ventes
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'profile' %}" class="nav-link text-white">
+                <i class="fa fa-user"></i> Mon profil
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'logout' %}" class="nav-link text-white">
+                <i class="fa fa-sign-out-alt"></i> Déconnexion
+            </a>
+        </li>
+    </ul>
+</nav>

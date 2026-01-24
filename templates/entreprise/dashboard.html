@@ -1,0 +1,614 @@
+<!-- templates/entreprise/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}Tableau de Bord{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-welcome {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.action-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.2s;
+    cursor: pointer;
+    text-align: center;
+    border-left: 4px solid;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: inherit;
+}
+
+.action-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.recent-section {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 0.5rem;
+}
+
+.list-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.badge-stock {
+    padding: 0.25em 0.6em;
+    font-size: 0.75em;
+    font-weight: 600;
+    border-radius: 10rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Couleurs pour les cartes d'action */
+.bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.bg-gradient-success { background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%); }
+.bg-gradient-warning { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+.bg-gradient-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+.bg-gradient-info { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); }
+
+.text-primary { color: #0d6efd; }
+.text-success { color: #198754; }
+.text-warning { color: #ffc107; }
+.text-danger { color: #dc3545; }
+.text-info { color: #0dcaf0; }
+
+.border-left-primary { border-left-color: #0d6efd; }
+.border-left-success { border-left-color: #198754; }
+.border-left-warning { border-left-color: #ffc107; }
+.border-left-danger { border-left-color: #dc3545; }
+.border-left-info { border-left-color: #0dcaf0; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Section de bienvenue -->
+<!-- <div class="dashboard-welcome">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="display-6 fw-bold mb-2">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Tableau de Bord
+            </h1>
+            <p class="mb-0 opacity-75">
+                {% if dashboard_type == 'super_admin' %}
+                    Super Administrateur - Vue système
+                {% elif dashboard_type == 'responsable' %}
+                    Responsable - {{ entreprise.nom }}
+                {% else %}
+                    Bienvenue, {{ user.get_full_name|default:user.username }} - Gérant
+                {% endif %}
+            </p>
+        </div>
+        <div class="text-end">
+            <div class="opacity-75">
+                <i class="bi bi-calendar me-1"></i>
+                {{ aujourdhui|date:"l d F Y" }}
+            </div>
+            <div class="opacity-75">
+                <i class="bi bi-clock me-1"></i>
+                {% now "H:i" %}
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="container-fluid">
+    
+    <!-- Statistiques rapides -->
+    {% if dashboard_type == 'gerant' or dashboard_type == 'responsable' or dashboard_type == 'super_admin' %}
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon text-primary">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <div class="stat-value">{{ ventes_aujourdhui }}</div>
+            <div class="stat-label">Ventes Aujourd'hui</div>
+            <small class="text-muted">{{ ca_aujourdhui|floatformat:0 }} FCFA</small>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon text-success">
+                <i class="bi bi-cash"></i>
+            </div>
+            <div class="stat-value">{{ ventes_semaine }}</div>
+            <div class="stat-label">Ventes Semaine</div>
+            <small class="text-muted">{{ ca_semaine|floatformat:0 }} FCFA</small>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon text-warning">
+                <i class="bi bi-box"></i>
+            </div>
+            <div class="stat-value">{{ produits_faible_stock.count }}</div>
+            <div class="stat-label">Stock Faible</div>
+            <small class="text-muted">À surveiller</small>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Actions rapides pour gérant -->
+    {% if dashboard_type == 'gerant' or dashboard_type == 'responsable' or dashboard_type == 'super_admin' %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="bi bi-lightning me-2"></i>
+                Actions Rapides
+            </h3>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="{% url 'vente_create' %}" class="action-card border-left-primary">
+                <div class="action-icon text-primary">
+                    <i class="bi bi-cart-plus"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Nouvelle Vente</h6>
+                <p class="small text-muted mb-0">Créer une facture</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="{% url 'stock_list' %}" class="action-card border-left-success">
+                <div class="action-icon text-success">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Voir Stock</h6>
+                <p class="small text-muted mb-0">Niveaux de stock</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="{% url 'produit:produit_list' %}" class="action-card border-left-warning">
+                <div class="action-icon text-warning">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Rechercher Produit</h6>
+                <p class="small text-muted mb-0">Par nom ou code</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="{% url 'client_list' %}" class="action-card border-left-info">
+                <div class="action-icon text-info">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Clients</h6>
+                <p class="small text-muted mb-0">Gérer les clients</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="{% url 'vente_list' %}" class="action-card border-left-primary">
+                <div class="action-icon text-primary">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Mes Ventes</h6>
+                <p class="small text-muted mb-0">Historique</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="#" class="action-card border-left-success" onclick="openCaisse()">
+                <div class="action-icon text-success">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Caisse</h6>
+                <p class="small text-muted mb-0">Ouvrir/fermer</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="#" class="action-card border-left-warning" onclick="showQuickInventory()">
+                <div class="action-icon text-warning">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Inventaire</h6>
+                <p class="small text-muted mb-0">Vérification rapide</p>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-6 mb-3">
+            <a href="#" class="action-card border-left-danger" onclick="showReports()">
+                <div class="action-icon text-danger">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <h6 class="fw-bold mb-1">Rapports</h6>
+                <p class="small text-muted mb-0">Voir statistiques</p>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Deux colonnes pour informations récentes -->
+    <div class="row">
+        <!-- Dernières ventes -->
+        <div class="col-lg-6 mb-4">
+            <div class="recent-section">
+                <h5 class="section-title">
+                    <i class="bi bi-cart me-2"></i>
+                    Dernières Ventes
+                </h5>
+                
+                {% if dernieres_ventes %}
+                    {% for vente in dernieres_ventes %}
+                    <div class="list-item">
+                        <div>
+                            <div class="fw-semibold">Vente #{{ vente.id }}</div>
+                            <small class="text-muted">
+                                {{ vente.date|date:"H:i" }} • 
+                                {% if vente.client %}
+                                    {{ vente.client.nom }}
+                                {% else %}
+                                    Client non spécifié
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold text-success">{{ vente.total|floatformat:0 }} FCFA</div>
+                            <small class="text-muted">{{ vente.date|date:"d/m" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'vente_list' %}" class="btn btn-outline-primary btn-sm">
+                            Voir toutes les ventes
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-cart"></i>
+                        <p>Aucune vente récente</p>
+                        <a href="{% url 'vente_create' %}" class="btn btn-primary">
+                            Créer une vente
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Produits stock faible -->
+        <div class="col-lg-6 mb-4">
+            <div class="recent-section">
+                <h5 class="section-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Stock à Surveiller
+                </h5>
+                
+                {% if produits_faible_stock %}
+                    {% for produit in produits_faible_stock %}
+                    <div class="list-item">
+                        <div>
+                            <div class="fw-semibold">{{ produit.nom }}</div>
+                            <small class="text-muted">{{ produit.reference }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">
+                                {{ produit.quantite_stock }} unités
+                            </div>
+                            <small>
+                                {% if produit.quantite_stock < 5 %}
+                                    <span class="badge bg-danger badge-stock">Très faible</span>
+                                {% else %}
+                                    <span class="badge bg-warning badge-stock">Faible</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'produit:produit_list' %}" class="btn btn-outline-warning btn-sm">
+                            Voir tous les produits
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-check-circle"></i>
+                        <p>Stock normal</p>
+                        <small class="text-muted">Aucun produit en stock critique</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mouvements récents -->
+    <div class="row">
+        <div class="col-12">
+            <div class="recent-section">
+                <h5 class="section-title">
+                    <i class="bi bi-arrow-left-right me-2"></i>
+                    Activité Récente
+                </h5>
+                
+                {% if mouvements_recents %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Produit</th>
+                                <th>Quantité</th>
+                                <th>Date</th>
+                                <th>Utilisateur</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mouvement in mouvements_recents %}
+                            <tr>
+                                <td>
+                                    {% if mouvement.type_mouvement == 'entree' %}
+                                        <span class="badge bg-success">Entrée</span>
+                                    {% elif mouvement.type_mouvement == 'sortie' %}
+                                        <span class="badge bg-danger">Sortie</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ mouvement.type_mouvement }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ mouvement.produit.nom }}</td>
+                                <td>{{ mouvement.quantite }}</td>
+                                <td>{{ mouvement.date_mouvement|date:"d/m H:i" }}</td>
+                                <td>{{ mouvement.utilisateur.username }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state py-4">
+                    <i class="bi bi-info-circle"></i>
+                    <p>Aucune activité récente</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% elif dashboard_type == 'responsable3' %}
+    <!-- Dashboard Responsable simplifié -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon text-primary">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-value">{{ total_utilisateurs }}</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon text-success">
+                    <i class="bi bi-box"></i>
+                </div>
+                <div class="stat-value">{{ total_produits }}</div>
+                <div class="stat-label">Produits</div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon text-warning">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="stat-value">{{ entreprise.nom }}</div>
+                <div class="stat-label">Entreprise</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif dashboard_type == 'super_admin' %}
+    <!-- Dashboard Super Admin simplifié -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon text-primary">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="stat-value">{{ total_entreprises }}</div>
+                <div class="stat-label">Entreprises</div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="stat-icon text-success">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-value">{{ total_utilisateurs }}</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Message du jour -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="recent-section bg-light">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-2">
+                            {% if dashboard_type == 'super_admin' %}
+                            <i class="bi bi-star-fill text-warning me-2"></i>
+                            Vue système - Super Administrateur
+                            {% elif dashboard_type == 'responsable' %}
+                            <i class="bi bi-shield-check text-primary me-2"></i>
+                            Gestion {{ entreprise.nom }} - Responsable
+                            {% else %}
+                            <i class="bi bi-person-check text-success me-2"></i>
+                            Bonne journée de travail !
+                            {% endif %}
+                        </h5>
+                        <p class="text-muted mb-0">
+                            {% now "l d F Y" %} • 
+                            {% if dashboard_type == 'super_admin' %}
+                            Système de gestion multi-entreprises
+                            {% elif dashboard_type == 'responsable' %}
+                            Gérez efficacement votre entreprise
+                            {% else %}
+                            {{ ventes_aujourdhui }} ventes aujourd'hui • {{ ca_aujourdhui|floatformat:0 }} FCFA
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-person me-1"></i>
+                            Mon Profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise à jour en temps réel de l'heure
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('fr-FR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        document.querySelector('.bi-clock').parentElement.innerHTML = 
+            `<i class="bi bi-clock me-1"></i>${timeString}`;
+    }
+    
+    setInterval(updateTime, 60000); // Mise à jour chaque minute
+    
+    // Fonctions pour les actions
+    window.openCaisse = function() {
+        alert('Fonctionnalité caisse - À implémenter');
+        // Ici vous pourriez ouvrir un modal pour gérer la caisse
+    };
+    
+    window.showQuickInventory = function() {
+        alert('Inventaire rapide - À implémenter');
+        // Ici vous pourriez ouvrir un modal pour un inventaire rapide
+    };
+    
+    window.showReports = function() {
+        alert('Rapports - À implémenter');
+        // Ici vous pourriez rediriger vers une page de rapports
+    };
+    
+    // Animation simple pour les cartes d'action
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Auto-refresh des données toutes les 5 minutes (optionnel)
+    // setTimeout(() => {
+    //     window.location.reload();
+    // }, 300000); // 5 minutes
+});
+</script>
+{% endblock %}

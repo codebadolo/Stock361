@@ -1,0 +1,135 @@
+<!-- templates/partials/_sidebar.html -->
+<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 250px; min-height: 100vh;">
+    <a href="{% url 'dashboard' %}" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <i class="fas fa-boxes me-2"></i>
+        <span class="fs-4">Stock361</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+
+        <!-- Dashboard visible pour tous -->
+        <li class="nav-item mb-2">
+            <a href="{% url 'dashboard' %}" class="nav-link text-white">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+        </li>
+
+        {% if user.est_super_admin %}
+        <!-- Super Admin -->
+        <li>
+            <a href="{% url 'entreprise_list' %}" class="nav-link text-white">
+                <i class="fas fa-building me-2"></i> Entreprises
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'utilisateur_list' %}" class="nav-link text-white">
+                <i class="fas fa-users me-2"></i> Utilisateurs
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'produit_list' %}" class="nav-link text-white">
+                <i class="fas fa-box-open me-2"></i> Produits
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'stock_list' %}" class="nav-link text-white">
+                <i class="fas fa-warehouse me-2"></i> Stocks
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'mouvement_list' %}" class="nav-link text-white">
+                <i class="fas fa-exchange-alt me-2"></i> Mouvements de stock
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'vente_list' %}" class="nav-link text-white">
+                <i class="fas fa-shopping-cart me-2"></i> Ventes
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'client_list' %}" class="nav-link text-white">
+                <i class="fas fa-user-friends me-2"></i> Clients
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'fournisseur_list' %}" class="nav-link text-white">
+                <i class="fas fa-truck me-2"></i> Fournisseurs
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'rapport_dashboard' %}" class="nav-link text-white">
+                <i class="fas fa-chart-line me-2"></i> Rapports
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'parametres' %}" class="nav-link text-white">
+                <i class="fas fa-cogs me-2"></i> Paramètres
+            </a>
+        </li>
+
+        {% elif user.est_responsable %}
+        <!-- Responsable entreprise -->
+        <li>
+            <a href="{% url 'produit_list' %}" class="nav-link text-white">
+                <i class="fas fa-box-open me-2"></i> Produits
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'stock_list' %}" class="nav-link text-white">
+                <i class="fas fa-warehouse me-2"></i> Stocks
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'mouvement_list' %}" class="nav-link text-white">
+                <i class="fas fa-exchange-alt me-2"></i> Mouvements de stock
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'vente_list' %}" class="nav-link text-white">
+                <i class="fas fa-shopping-cart me-2"></i> Ventes
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'client_list' %}" class="nav-link text-white">
+                <i class="fas fa-user-friends me-2"></i> Clients
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'fournisseur_list' %}" class="nav-link text-white">
+                <i class="fas fa-truck me-2"></i> Fournisseurs
+            </a>
+        </li>
+
+        {% else %}
+        <!-- Gérant / Secrétaire -->
+        <li>
+            <a href="{% url 'vente_list' %}" class="nav-link text-white">
+                <i class="fas fa-shopping-cart me-2"></i> Ventes
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'stock_list' %}" class="nav-link text-white">
+                <i class="fas fa-warehouse me-2"></i> Stocks
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'inventaire_list' %}" class="nav-link text-white">
+                <i class="fas fa-clipboard-list me-2"></i> Inventaire
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+    <hr>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+           id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://via.placeholder.com/32" alt="" width="32" height="32" class="rounded-circle me-2">
+            <strong>{{ user.username }}</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser">
+            <li><a class="dropdown-item" href="{% url 'profile' %}">Profil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a></li>
+        </ul>
+    </div>
+</div>

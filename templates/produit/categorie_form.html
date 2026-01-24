@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle catégorie{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'categorie_list' %}">Catégories</a></li>
+    <li class="breadcrumb-item active">
+        {% if view.object %}Modifier{% else %}Nouvelle{% endif %} catégorie
+    </li>
+  </ol>
+</nav>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
+        <h4 class="mb-0">
+            <i class="bi bi-tags"></i>
+            {% if view.object %}
+                Modifier la catégorie
+            {% else %}
+                Créer une nouvelle catégorie
+            {% endif %}
+        </h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nom de la catégorie</label>
+                    {{ form.nom }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Catégorie parente</label>
+                    {{ form.parent }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{% url 'categorie_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

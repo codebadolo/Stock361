@@ -1,0 +1,537 @@
+{% extends 'base.html' %}
+{% block title %}Détails de {{ entreprise.nom }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'entreprise_list' %}"><i class="bi bi-building"></i> Entreprises</a></li>
+    <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-info-circle"></i> {{ entreprise.nom|truncatechars:30 }}</li>
+  </ol>
+</nav>
+
+<!-- En-tête avec titre et actions -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">
+            <i class="bi bi-building me-2"></i>{{ entreprise.nom }}
+        </h1>
+        <p class="text-muted mb-0">
+            <i class="bi bi-hash me-1"></i>IFU: {{ entreprise.ifu }}
+        </p>
+    </div>
+    <div class="btn-group" role="group">
+        <a href="{% url 'entreprise_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+        <a href="{% url 'entreprise_update' entreprise.id %}" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i> Modifier
+        </a>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="bi bi-person-plus me-1"></i> Ajouter utilisateur
+        </button>
+    </div>
+</div>
+
+<!-- Section principale en 2 colonnes -->
+<div class="row">
+    <!-- Colonne gauche : Informations de l'entreprise -->
+    <div class="col-lg-8 mb-4">
+        <!-- Carte informations entreprise -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Informations de l'entreprise
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-4">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        {% if entreprise.logo %}
+                            <img src="{{ entreprise.logo.url }}" 
+                                 alt="Logo {{ entreprise.nom }}" 
+                                 class="rounded shadow-sm"
+                                 style="width:120px; height:120px; object-fit:cover;">
+                        {% else %}
+                            <div class="avatar-placeholder rounded d-flex align-items-center justify-content-center bg-light border"
+                                 style="width:120px; height:120px;">
+                                <i class="bi bi-building fs-1 text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Informations -->
+                    <div class="flex-grow-1">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-card-text text-primary me-2"></i>
+                                    <span class="fw-semibold me-2">IFU:</span>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ entreprise.ifu }}
+                                    </span>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-telephone text-success me-2"></i>
+                                    <span class="fw-semibold me-2">Contact:</span>
+                                    {% if entreprise.contact %}
+                                        <a href="tel:{{ entreprise.contact }}" class="text-decoration-none">
+                                            {{ entreprise.contact }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Non spécifié</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-calendar-check text-info me-2"></i>
+                                    <span class="fw-semibold me-2">Créée le:</span>
+                                    <span>{{ entreprise.date_creation|date:"d/m/Y à H:i" }}</span>
+                                </div>
+                                
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <span class="fw-semibold me-2">Statut:</span>
+                                    {% if entreprise.est_actif %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Responsable -->
+                        <div class="border-top pt-3 mt-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-person-badge text-warning me-2"></i>
+                                <span class="fw-semibold me-2">Responsable:</span>
+                            </div>
+                            {% if entreprise.responsable %}
+                                <div class="d-flex align-items-center bg-light p-3 rounded">
+                                    <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-primary text-white me-3"
+                                         style="width:45px; height:45px;">
+                                        {{ entreprise.responsable.get_full_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ entreprise.responsable.get_full_name }}</div>
+                                        <div class="text-muted small">
+                                            <i class="bi bi-envelope me-1"></i>
+                                            {{ entreprise.responsable.email|default:"Pas d'email" }}
+                                            •
+                                            <i class="bi bi-person-badge me-1"></i>
+                                            {{ entreprise.responsable.get_type_utilisateur_display }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning py-2 mb-0">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Aucun responsable désigné pour cette entreprise
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques utilisateurs -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-left-primary shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="text-muted small fw-semibold text-uppercase">Total</div>
+                                <div class="h3 mb-0 fw-bold text-primary">{{ total_utilisateurs }}</div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-people fs-2 text-primary opacity-75"></i>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-person me-1"></i>Utilisateurs total
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-left-success shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="text-muted small fw-semibold text-uppercase">Super Admin</div>
+                                <div class="h3 mb-0 fw-bold text-success">{{ total_super_admin }}</div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-shield-check fs-2 text-success opacity-75"></i>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-person-gear me-1"></i>Administrateurs
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-left-warning shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="text-muted small fw-semibold text-uppercase">Responsable</div>
+                                <div class="h3 mb-0 fw-bold text-warning">{{ total_responsable }}</div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-badge fs-2 text-warning opacity-75"></i>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-person-check me-1"></i>Responsables
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-xl-3">
+                <div class="card border-left-info shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="text-muted small fw-semibold text-uppercase">Gérants</div>
+                                <div class="h3 mb-0 fw-bold text-info">{{ total_gerant }}</div>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-gear fs-2 text-info opacity-75"></i>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            <i class="bi bi-person-workspace me-1"></i>Gérants & Secrétaires
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colonne droite : Actions rapides -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning-charge me-2"></i>Actions rapides
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'utilisateur_create' %}?entreprise={{ entreprise.id }}" 
+                       class="btn btn-outline-primary text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-plus fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Ajouter utilisateur</div>
+                                <small class="text-muted">Créer un nouvel utilisateur</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" class="btn btn-outline-success text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-envelope-plus fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Envoyer invitation</div>
+                                <small class="text-muted">Inviter par email</small>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <a href="{% url 'entreprise_update' entreprise.id %}" 
+                       class="btn btn-outline-warning text-start py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-pencil-square fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Modifier informations</div>
+                                <small class="text-muted">Mettre à jour les données</small>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <button type="button" class="btn btn-outline-danger text-start py-3"
+                            onclick="showDeleteConfirmation()">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-trash fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-bold">Supprimer entreprise</div>
+                                <small class="text-muted">Action irréversible</small>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Dernières activités -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Récent
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for u in utilisateurs|slice:":3" %}
+                    <div class="timeline-item mb-3">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <div class="fw-semibold">{{ u.get_full_name }}</div>
+                            <div class="small text-muted">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ u.date_joined|date:"d/m/Y" }}
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-info-circle fs-4 d-block mb-2"></i>
+                        Aucune activité récente
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Table des utilisateurs -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="bi bi-people me-2"></i>Utilisateurs de l'entreprise
+        </h5>
+        <span class="badge bg-primary rounded-pill">
+            <i class="bi bi-person-fill me-1"></i>{{ utilisateurs.count }} utilisateur{{ utilisateurs.count|pluralize }}
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 50px;"></th>
+                        <th>Utilisateur</th>
+                        <th>Rôle</th>
+                        <th>Contact</th>
+                        <th>Statut</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in utilisateurs %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center 
+                                        {% if u.est_super_admin %}bg-danger text-white
+                                        {% elif u.est_responsable %}bg-warning text-white
+                                        {% else %}bg-info text-white{% endif %}"
+                                 style="width:36px; height:36px;">
+                                {{ u.get_full_name|first|upper }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ u.get_full_name }}</div>
+                            <div class="text-muted small">
+                                <i class="bi bi-person me-1"></i>{{ u.username }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if u.est_super_admin %}bg-danger
+                                {% elif u.est_responsable %}bg-warning
+                                {% else %}bg-info{% endif %}">
+                                <i class="bi 
+                                    {% if u.est_super_admin %}bi-shield-check
+                                    {% elif u.est_responsable %}bi-person-badge
+                                    {% else %}bi-person-gear{% endif %} me-1"></i>
+                                {{ u.get_type_utilisateur_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if u.email %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope text-muted me-2"></i>
+                                    <a href="mailto:{{ u.email }}" class="text-decoration-none small">
+                                        {{ u.email|truncatechars:20 }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                            {% if u.telephone %}
+                                <div class="d-flex align-items-center mt-1">
+                                    <i class="bi bi-telephone text-muted me-2"></i>
+                                    <a href="tel:{{ u.telephone }}" class="text-decoration-none small">
+                                        {{ u.telephone }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.est_actif %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Actif
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle me-1"></i>Inactif
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'utilisateur_detail' u.id %}" 
+                                   class="btn btn-outline-info"
+                                   title="Détails"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                {% if request.user.est_super_admin %}
+                                <a href="{% url 'utilisateur_update' u.id %}" 
+                                   class="btn btn-outline-primary"
+                                   title="Modifier"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-outline-danger"
+                                        title="Supprimer"
+                                        data-bs-toggle="tooltip"
+                                        onclick="confirmDeleteUser('{{ u.id }}', '{{ u.get_full_name|escapejs }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="text-muted mb-2">
+                                <i class="bi bi-people fs-1"></i>
+                            </div>
+                            <h5 class="text-muted">Aucun utilisateur</h5>
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Ajoutez des utilisateurs pour commencer
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-octagon me-2"></i>
+                    <strong>Attention !</strong> Cette action est irréversible.
+                </div>
+                <p>Êtes-vous sûr de vouloir supprimer l'entreprise <strong id="entrepriseName"></strong> ?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-person-x me-2"></i>
+                    <strong>Tous les utilisateurs associés seront également supprimés.</strong>
+                    <div class="mt-2">
+                        <i class="bi bi-people me-1"></i>
+                        {{ utilisateurs.count }} utilisateur{{ utilisateurs.count|pluralize }} seront affectés
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.timeline {
+    position: relative;
+    padding-left: 20px;
+}
+.timeline-item {
+    position: relative;
+}
+.timeline-marker {
+    position: absolute;
+    left: -20px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.timeline-content {
+    margin-left: 10px;
+}
+.border-left-primary { border-left: 4px solid #0d6efd !important; }
+.border-left-success { border-left: 4px solid #198754 !important; }
+.border-left-warning { border-left: 4px solid #ffc107 !important; }
+.border-left-info { border-left: 4px solid #0dcaf0 !important; }
+.card {
+    border-radius: 0.5rem;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+</style>
+
+<script>
+function showDeleteConfirmation() {
+    document.getElementById('entrepriseName').textContent = '{{ entreprise.nom|escapejs }}';
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+
+function confirmDeleteUser(userId, userName) {
+    if (confirm('Supprimer l\'utilisateur "' + userName + '" ?')) {
+        // Ajouter ici la logique de suppression AJAX ou formulaire
+        console.log('Suppression utilisateur:', userId);
+    }
+}
+
+// Initialiser les tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+{% endblock %}

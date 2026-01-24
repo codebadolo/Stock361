@@ -1,0 +1,9 @@
+Django>=4.2
+djangorestframework
+Pillow
+reportlab
+weasyprint
+qrcode
+django-widget-tweaks
+pandas
+openpyxl

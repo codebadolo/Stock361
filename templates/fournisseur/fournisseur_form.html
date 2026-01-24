@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Fournisseur{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'fournisseur_list' %}">Fournisseurs</a></li>
+    <li class="breadcrumb-item active">Formulaire</li>
+  </ol>
+</nav>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header">
+    <h5>{{ view.object|default:"Nouveau fournisseur" }}</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="text-end">
+        <a href="{% url 'fournisseur_list' %}" class="btn btn-secondary">Annuler</a>
+        <button class="btn btn-success">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

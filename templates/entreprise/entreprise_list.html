@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des entreprises{% endblock %}
+
+{% block content %}
+
+
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">
+        <i class="bi bi-building me-2"></i>Entreprises
+    </h1>
+    <a href="{% url 'entreprise_create' %}" class="btn btn-success">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle entreprise
+    </a>
+</div>
+
+<!-- ====== CARDS DE STATISTIQUES ====== -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                            Entreprises
+                        </div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_entreprises }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-building fs-2 text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                            Utilisateurs
+                        </div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_utilisateurs }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fs-2 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                            Responsables
+                        </div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_responsable }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-person-badge fs-2 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
+                            Gérants/Secrétaires
+                        </div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_gerant }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-person-gear fs-2 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== TABLEAU ENTREPRISES ====== -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-table me-2"></i>Liste des entreprises
+            </h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="refreshTable">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="entrepriseTable" class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 60px;">
+                            <i class="bi bi-image"></i>
+                        </th>
+                        <th>
+                            <i class="bi bi-building me-1"></i>Nom
+                        </th>
+                        <th>
+                            <i class="bi bi-card-text me-1"></i>IFU
+                        </th>
+                        <th>
+                            <i class="bi bi-telephone me-1"></i>Contact
+                        </th>
+                        <th>
+                            <i class="bi bi-person-check me-1"></i>Responsable
+                        </th>
+                        <th class="text-center">
+                            <i class="bi bi-people me-1"></i>Utilisateurs
+                        </th>
+                        <th class="text-center" style="width: 120px;">
+                            <i class="bi bi-gear me-1"></i>Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in entreprises %}
+                    <tr>
+                        <td class="text-center">
+                            {% if e.logo %}
+                                <img src="{{ e.logo.url }}" alt="{{ e.nom }}" 
+                                     class="rounded-circle" 
+                                     style="height:40px; width:40px; object-fit:cover; border: 2px solid #dee2e6;">
+                            {% else %}
+                                <div class="avatar-placeholder rounded-circle d-inline-flex align-items-center justify-content-center bg-light text-muted"
+                                     style="width:40px; height:40px;">
+                                    <i class="bi bi-building fs-5"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ e.nom }}</div>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>
+                                {{ e.date_creation|date:"d/m/Y" }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-hash me-1"></i>{{ e.ifu }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if e.contact %}
+                                <a href="tel:{{ e.contact }}" class="text-decoration-none">
+                                    <i class="bi bi-telephone-outbound me-1"></i>
+                                    {{ e.contact }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">
+                                    <i class="bi bi-telephone-x me-1"></i>Non spécifié
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if e.responsable %}
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-placeholder rounded-circle d-inline-flex align-items-center justify-content-center bg-primary text-white me-2"
+                                         style="width:30px; height:30px; font-size:12px;">
+                                        {{ e.responsable.get_full_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ e.responsable.get_full_name }}</div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-person-badge me-1"></i>
+                                            {{ e.responsable.get_type_utilisateur_display }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">
+                                    <i class="bi bi-person-x me-1"></i>Aucun responsable
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if e.utilisateurs.count > 0 %}
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="bi bi-people-fill me-1"></i>
+                                    {{ e.utilisateurs.count }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-muted rounded-pill">
+                                    <i class="bi bi-people me-1"></i>
+                                    0
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'entreprise_detail' e.id %}" 
+                                   class="btn btn-outline-info" 
+                                   title="Détails"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'entreprise_update' e.id %}" 
+                                   class="btn btn-outline-primary" 
+                                   title="Modifier"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-outline-danger" 
+                                        title="Supprimer"
+                                        data-bs-toggle="tooltip"
+                                        onclick="confirmDelete({{ e.id }}, '{{ e.nom|escapejs }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <div class="text-muted mb-2">
+                                <i class="bi bi-building fs-1"></i>
+                            </div>
+                            <h5 class="text-muted">Aucune entreprise trouvée</h5>
+                            <p class="text-muted mb-0">Cliquez sur "Nouvelle entreprise" pour en créer une</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ entreprises.count }} entreprise{{ entreprises.count|pluralize }} au total
+            </small>
+            <a href="{% url 'entreprise_create' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> Ajouter une entreprise
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                    Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'entreprise <strong id="entrepriseName"></strong> ?</p>
+                <p class="text-danger mb-0">
+                    <i class="bi bi-exclamation-circle me-1"></i>
+                    Cette action est irréversible et supprimera tous les utilisateurs associés.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Annuler
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== DATATABLE + EXPORT ====== -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+<style>
+.avatar-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    border-radius: 0.5rem;
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+.badge {
+    font-weight: 500;
+}
+.btn-group .btn {
+    border-radius: 0.25rem !important;
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialiser DataTable
+    $('#entrepriseTable').DataTable({
+        dom: '<"row"<"col-md-6"l><"col-md-6"f>><"row"<"col-md-12"tr>><"row"<"col-md-5"i><"col-md-7"p>>',
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[1, 'asc']],
+        lengthMenu: [5, 10, 25, 50],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        }
+    });
+    
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Bouton rafraîchir
+    $('#refreshTable').click(function() {
+        location.reload();
+    });
+});
+
+// Fonction de confirmation de suppression
+function confirmDelete(id, name) {
+    $('#entrepriseName').text(name);
+    $('#deleteForm').attr('action', `/entreprise/${id}/delete/`);
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+
+{% endblock %}

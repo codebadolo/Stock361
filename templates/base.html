@@ -1,0 +1,516 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Stock361{% endblock %}</title>
+   <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6fb;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: linear-gradient(180deg, #0d6efd, #084298);
+            color: white;
+            padding: 15px;
+            transition: 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar .brand {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0 30px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e9ecef;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin: 3px 0;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .sidebar a.active {
+            background: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+
+        .menu-title {
+            margin: 20px 10px 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            margin-left: 260px;
+            padding: 20px;
+            transition: 0.3s;
+            min-height: 100vh;
+        }
+
+        /* ===== TOPBAR ===== */
+        .topbar {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .topbar .user-info {
+            font-weight: 500;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar.collapsed a span,
+        .sidebar.collapsed .menu-title,
+        .sidebar.collapsed .brand span {
+            display: none;
+        }
+
+        .sidebar.collapsed .brand {
+            font-size: 20px;
+        }
+
+        .main.collapsed {
+            margin-left: 80px;
+        }
+
+        /* ===== SPINNER ===== */
+        .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(3px);
+        }
+
+        .spinner-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner-icon {
+            font-size: 3rem;
+            color: #0d6efd;
+            margin-bottom: 15px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        .spinner-text {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ===== LOADING INDICATOR ===== */
+        .loading-indicator3 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #0d6efd, #084298, #0d6efd);
+            background-size: 200% 100%;
+            animation: loading 2s linear infinite;
+            z-index: 9998;
+            display: none;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== BUTTON SPINNER ===== */
+        .btn-spinner2 {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: btn-spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes btn-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            z-index: 1100;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar a span,
+            .sidebar .menu-title,
+            .sidebar .brand span {
+                display: none;
+            }
+            .main {
+                margin-left: 80px;
+            }
+            .spinner-container {
+                padding: 30px;
+            }
+            .spinner-icon {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Spinner Overlay -->
+<!-- <div class="spinner-overlay3" id="globalSpinner">
+    <div class="spinner-container">
+        <i class="bi bi-arrow-clockwise spinner-icon"></i>
+        <div class="spinner-text">Chargement...</div>
+    </div>
+</div> -->
+
+<!-- Loading Indicator -->
+<!-- <div class="loading-indicator3" id="loadingIndicator"></div> -->
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="brand">
+        <i class="bi bi-box-seam"></i> <span>Stock361</span>
+    </div>
+
+    {% if request.user.est_super_admin %}
+        <!-- Super Admin -->
+        <div class="menu-title">Général</div>
+        <a href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
+
+        <div class="menu-title">Administration</div>
+        <a href="{% url 'entreprise_list' %}"><i class="bi bi-building"></i> <span>Entreprises</span></a>
+        <a href="{% url 'utilisateur_list' %}"><i class="bi bi-people"></i> <span>Utilisateurs</span></a>
+
+        <div class="menu-title">Gestion</div>
+        <a href="{% url 'produit:produit_list' %}"><i class="bi bi-box"></i> <span>Produits</span></a>
+        <a href="{% url 'produit:categorie_list' %}">
+            <i class="bi bi-tags"></i> <span>Catégories</span>
+        </a>
+        <a href="{% url 'stock_list' %}"><i class="bi bi-stack"></i> <span>Stocks</span></a>
+        <a href="{% url 'inventaire_list' %}"><i class="bi bi-stack"></i> <span>Inventaire</span></a>
+        <a href="{% url 'mouvement_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Mouvements</span></a>
+        <a href="{% url 'vente_list' %}"><i class="bi bi-cart"></i> <span>Ventes</span></a>
+
+        <div class="menu-title">Tiers</div>
+        <a href="{% url 'client_list' %}"><i class="bi bi-person-badge"></i> <span>Clients</span></a>
+        <a href="{% url 'fournisseur_list' %}"><i class="bi bi-truck"></i> <span>Fournisseurs</span></a>
+        <a href="{% url 'approvisionnement_list' %}"><i class="bi bi-truck"></i> <span>Approvisionnements</span></a>
+
+    {% elif request.user.est_responsable %}
+        <!-- Responsable -->
+        <div class="menu-title">Général</div>
+        <a href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
+
+        <div class="menu-title">Gestion</div>
+        <a href="{% url 'produit:produit_list' %}"><i class="bi bi-box"></i> <span>Produits</span></a>
+        <a href="{% url 'produit:categorie_list' %}">
+            <i class="bi bi-tags"></i> <span>Catégories</span>
+        </a>
+         <a href="{% url 'utilisateur_list' %}"><i class="bi bi-people"></i> <span>Utilisateurs</span></a>
+
+        <a href="{% url 'stock_list' %}"><i class="bi bi-stack"></i> <span>Stocks</span></a>
+        <a href="{% url 'mouvement_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Mouvements</span></a>
+                <a href="{% url 'inventaire_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Inventaire</span></a>
+        <a href="{% url 'vente_list' %}"><i class="bi bi-cart"></i> <span>Ventes</span></a>
+
+              <div class="menu-title">Tiers</div>
+        <a href="{% url 'client_list' %}"><i class="bi bi-person-badge"></i> <span>Clients</span></a>
+        <a href="{% url 'fournisseur_list' %}"><i class="bi bi-truck"></i> <span>Fournisseurs</span></a>
+        <a href="{% url 'approvisionnement_list' %}"><i class="bi bi-truck"></i> <span>Approvisionnements</span></a>
+
+        <div class="menu-title">Analyse</div>
+        <a href="#"><i class="bi bi-bar-chart"></i> <span>Rapports</span></a>
+
+    {% elif request.user.est_gerant %}
+        <!-- Gérant / Secrétaire -->
+        <div class="menu-title">Général</div>
+        <a href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
+ <div class="menu-title">Gestion</div>
+        <a href="{% url 'produit:produit_list' %}"><i class="bi bi-box"></i> <span>Produits</span></a>
+        <a href="{% url 'produit:categorie_list' %}">
+            <i class="bi bi-tags"></i> <span>Catégories</span>
+        </a>
+      
+
+        <div class="menu-title">Opérations</div>
+        <a href="{% url 'vente_list' %}"><i class="bi bi-cart"></i> <span>Ventes</span></a>
+        <a href="{% url 'stock_list' %}"><i class="bi bi-stack"></i> <span>Stocks</span></a>
+
+        <div class="menu-title">Clients</div>
+        <a href="{% url 'client_list' %}"><i class="bi bi-person-badge"></i> <span>Clients</span></a>
+    {% endif %}
+
+    <hr class="text-white">
+    <a href="{% url 'logout' %}" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span>Déconnexion</span></a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-sm btn-outline-primary" id="toggleSidebar"><i class="bi bi-list"></i></button>
+            <div class="user-info">
+                {{ request.user.username }}
+                <span class="text-muted">({{ request.user.get_role_display }})</span>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary" id="refreshBtn" title="Actualiser">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+        <div>
+            <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-person"></i> Profil</a>
+        </div>
+    </div>
+
+    {% include 'partials/_messages.html' %}
+    {% block content %}{% endblock %}
+</div>
+
+<!-- JS -->
+<script>
+    // DOM Elements
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+    const globalSpinner = document.getElementById("globalSpinner");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    // Toggle Sidebar
+    toggleBtn.addEventListener("click", function () {
+        sidebar.classList.toggle("collapsed");
+        main.classList.toggle("collapsed");
+        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    });
+
+    // Restore sidebar state
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        if (savedState === 'true') {
+            sidebar.classList.add('collapsed');
+            main.classList.add('collapsed');
+        }
+    });
+
+    // Global loading functions
+    function showLoading(message = 'Chargement...') {
+        if (globalSpinner.querySelector('.spinner-text')) {
+            globalSpinner.querySelector('.spinner-text').textContent = message;
+        }
+        globalSpinner.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideLoading() {
+        globalSpinner.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function showLoadingIndicator() {
+        loadingIndicator.style.display = 'block';
+    }
+
+    function hideLoadingIndicator() {
+        loadingIndicator.style.display = 'none';
+    }
+
+    // Refresh button
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            showLoadingIndicator();
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
+        });
+    }
+
+    // Form submission with loading
+    document.addEventListener('submit', function(e) {
+        if (e.target.matches('form:not(.no-loading)')) {
+            showLoading('Traitement en cours...');
+        }
+    });
+
+    // AJAX requests with loading
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options = {}) {
+        const isAjax = options.headers && 
+                      (options.headers['X-Requested-With'] === 'XMLHttpRequest' ||
+                       options.headers['Content-Type'] === 'application/json');
+        
+        if (!isAjax) return originalFetch(url, options);
+        
+        showLoadingIndicator();
+        
+        return originalFetch(url, options)
+            .then(response => {
+                hideLoadingIndicator();
+                return response;
+            })
+            .catch(error => {
+                hideLoadingIndicator();
+                throw error;
+            });
+    };
+
+    // Show loading on navigation
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a');
+        if (link && 
+            link.href && 
+            !link.href.includes('#') && 
+            !link.href.includes('javascript:') &&
+            link.href.startsWith(window.location.origin) &&
+            !link.target === '_blank' &&
+            !link.classList.contains('no-loading')) {
+            showLoading('Chargement de la page...');
+        }
+    });
+
+    // Handle browser back/forward
+    window.addEventListener('beforeunload', function() {
+        showLoadingIndicator();
+    });
+
+    window.addEventListener('load', function() {
+        hideLoading();
+        hideLoadingIndicator();
+    });
+
+    // Toast notification function
+    function showToast(type, message, duration = 3000) {
+        const toastContainer = document.getElementById('toastContainer') || (() => {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+            document.body.appendChild(container);
+            return container;
+        })();
+
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, { delay: duration });
+        toast.show();
+
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            toastElement.remove();
+        });
+    }
+
+    // Make functions globally available
+    window.showLoading = showLoading;
+    window.hideLoading = hideLoading;
+    window.showLoadingIndicator = showLoadingIndicator;
+    window.hideLoadingIndicator = hideLoadingIndicator;
+    window.showToast = showToast;
+
+    // Button spinner helper
+    function setButtonLoading(button, isLoading) {
+        if (isLoading) {
+            const originalContent = button.innerHTML;
+            button.dataset.originalContent = originalContent;
+            button.innerHTML = '<span class="btn-spinner"></span>' + originalContent;
+            button.disabled = true;
+        } else {
+            if (button.dataset.originalContent) {
+                button.innerHTML = button.dataset.originalContent;
+                delete button.dataset.originalContent;
+            }
+            button.disabled = false;
+        }
+    }
+
+    window.setButtonLoading = setButtonLoading;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
