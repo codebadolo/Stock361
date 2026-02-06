@@ -44,7 +44,7 @@ class ApprovisionnementListView(LoginRequiredMixin, ListView):
     model = Approvisionnement
     template_name = 'fournisseur/approvisionnement_list.html'
     context_object_name = 'approvisionnements'
-    paginate_by = 20
+    paginate_by = 50
 
     def get_queryset(self):
         return Approvisionnement.objects.filter(
