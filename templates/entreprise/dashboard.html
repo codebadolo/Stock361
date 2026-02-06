@@ -190,7 +190,7 @@
 
 <div class="container-fluid">
     
-    <!-- Statistiques rapides -->
+    <!-- Statistiques rapides
     {% if dashboard_type == 'gerant' or dashboard_type == 'responsable' or dashboard_type == 'super_admin' %}
     <div class="quick-stats">
         <div class="stat-card">
@@ -221,6 +221,7 @@
         </div>
     </div>
     {% endif %}
+     -->
     
     <!-- Actions rapides pour gérant -->
     {% if dashboard_type == 'gerant' or dashboard_type == 'responsable' or dashboard_type == 'super_admin' %}
@@ -373,12 +374,12 @@
                     {% for produit in produits_faible_stock %}
                     <div class="list-item">
                         <div>
-                            <div class="fw-semibold">{{ produit.nom }}</div>
-                            <small class="text-muted">{{ produit.reference }}</small>
+                            <div class="fw-semibold">{{ produit.entrprise.nom }}</div>
+                            <small class="text-muted">{{ produit.entreprise.reference }}</small>
                         </div>
                         <div class="text-end">
                             <div class="fw-bold">
-                                {{ produit.quantite_stock }} unités
+                                {{ produit.entreprise.quantite_stock }} unités
                             </div>
                             <small>
                                 {% if produit.quantite_stock < 5 %}
@@ -407,7 +408,7 @@
         </div>
     </div>
     
-    <!-- Mouvements récents -->
+    <!-- Mouvements récents
     <div class="row">
         <div class="col-12">
             <div class="recent-section">
@@ -458,6 +459,7 @@
             </div>
         </div>
     </div>
+     -->
     
     {% elif dashboard_type == 'responsable3' %}
     <!-- Dashboard Responsable simplifié -->
@@ -518,7 +520,7 @@
     </div>
     {% endif %}
     
-    <!-- Message du jour -->
+    <!-- Message du jour 
     <div class="row mt-4">
         <div class="col-12">
             <div class="recent-section bg-light">
@@ -547,16 +549,17 @@
                             {% endif %}
                         </p>
                     </div>
-                    <div class="col-md-4 text-end">
+                     <div class="col-md-4 text-end">
                         <a href="{% url 'profile' %}" class="btn btn-outline-primary">
                             <i class="bi bi-person me-1"></i>
                             Mon Profil
                         </a>
-                    </div>
+                    </div> 
                 </div>
             </div>
         </div>
     </div>
+    -->
 </div>
 
 {% endblock %}

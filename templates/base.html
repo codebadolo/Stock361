@@ -1,21 +1,25 @@
-<!-- templates/base.html -->
-
 <!DOCTYPE html>
 <html lang="fr">
-    {% load static %}
+{% load static %}
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Stock361{% endblock %}</title>
-   <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Bootstrap + Icons -->
+    
+    <!-- Bootstrap 5.3.2 CSS (un seul lien) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons 1.11.1 (un seul lien) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
-<link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/font/bootstrap-icons.css' %}">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+    
+    <!-- Votre CSS personnalisé -->
     <style>
         body {
             margin: 0;
@@ -84,13 +88,13 @@
         /* ===== TOPBAR ===== */
         .topbar {
             background: #fff;
-            border-radius: 12px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 16px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 10px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .topbar .user-info {
@@ -116,92 +120,6 @@
             margin-left: 80px;
         }
 
-        /* ===== SPINNER ===== */
-        .spinner-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(3px);
-        }
-
-        .spinner-container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .spinner-icon {
-            font-size: 3rem;
-            color: #0d6efd;
-            margin-bottom: 15px;
-            animation: spin 1.5s linear infinite;
-        }
-
-        .spinner-text {
-            color: #333;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .spinner-pulse {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* ===== LOADING INDICATOR ===== */
-        .loading-indicator3 {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, #0d6efd, #084298, #0d6efd);
-            background-size: 200% 100%;
-            animation: loading 2s linear infinite;
-            z-index: 9998;
-            display: none;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* ===== BUTTON SPINNER ===== */
-        .btn-spinner2 {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: btn-spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes btn-spin {
-            to { transform: rotate(360deg); }
-        }
-
         /* ===== TOAST ===== */
         .toast-container {
             z-index: 1100;
@@ -219,30 +137,31 @@
             }
             .main {
                 margin-left: 80px;
+                padding: 15px;
             }
-            .spinner-container {
-                padding: 30px;
-            }
-            .spinner-icon {
-                font-size: 2.5rem;
-            }
+        }
+
+        /* Style pour le spinner des boutons */
+        .btn-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
         }
     </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-<!-- Spinner Overlay -->
-<!-- <div class="spinner-overlay3" id="globalSpinner">
-    <div class="spinner-container">
-        <i class="bi bi-arrow-clockwise spinner-icon"></i>
-        <div class="spinner-text">Chargement...</div>
-    </div>
-</div> -->
-
-<!-- Loading Indicator -->
-<!-- <div class="loading-indicator3" id="loadingIndicator"></div> -->
 
 <!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
@@ -271,9 +190,7 @@
 
         <div class="menu-title">Tiers</div>
         <a href="{% url 'client_list' %}"><i class="bi bi-person-badge"></i> <span>Clients</span></a>
-        <a href="{% url 'fournisseur_list' %}"><i class="bi bi-truck"></i> <span>Fournisseurs</span></a>
-        <a href="{% url 'approvisionnement_list' %}"><i class="bi bi-truck"></i> <span>Approvisionnements</span></a>
-
+       
     {% elif request.user.est_responsable %}
         <!-- Responsable -->
         <div class="menu-title">Général</div>
@@ -284,31 +201,27 @@
         <a href="{% url 'produit:categorie_list' %}">
             <i class="bi bi-tags"></i> <span>Catégories</span>
         </a>
-         <a href="{% url 'utilisateur_list' %}"><i class="bi bi-people"></i> <span>Utilisateurs</span></a>
 
         <a href="{% url 'stock_list' %}"><i class="bi bi-stack"></i> <span>Stocks</span></a>
         <a href="{% url 'mouvement_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Mouvements</span></a>
-                <a href="{% url 'inventaire_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Inventaire</span></a>
+        <a href="{% url 'inventaire_list' %}"><i class="bi bi-arrow-left-right"></i> <span>Inventaire</span></a>
         <a href="{% url 'vente_list' %}"><i class="bi bi-cart"></i> <span>Ventes</span></a>
 
-              <div class="menu-title">Tiers</div>
+        <div class="menu-title">Tiers</div>
         <a href="{% url 'client_list' %}"><i class="bi bi-person-badge"></i> <span>Clients</span></a>
         <a href="{% url 'fournisseur_list' %}"><i class="bi bi-truck"></i> <span>Fournisseurs</span></a>
         <a href="{% url 'approvisionnement_list' %}"><i class="bi bi-truck"></i> <span>Approvisionnements</span></a>
-
-        <div class="menu-title">Analyse</div>
-        <a href="#"><i class="bi bi-bar-chart"></i> <span>Rapports</span></a>
 
     {% elif request.user.est_gerant %}
         <!-- Gérant / Secrétaire -->
         <div class="menu-title">Général</div>
         <a href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> <span>Dashboard</span></a>
- <div class="menu-title">Gestion</div>
+        
+        <div class="menu-title">Gestion</div>
         <a href="{% url 'produit:produit_list' %}"><i class="bi bi-box"></i> <span>Produits</span></a>
         <a href="{% url 'produit:categorie_list' %}">
             <i class="bi bi-tags"></i> <span>Catégories</span>
         </a>
-      
 
         <div class="menu-title">Opérations</div>
         <a href="{% url 'vente_list' %}"><i class="bi bi-cart"></i> <span>Ventes</span></a>
@@ -336,23 +249,42 @@
                 <i class="bi bi-arrow-clockwise"></i>
             </button>
         </div>
-        <div>
-            <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-person"></i> Profil</a>
-        </div>
     </div>
 
     {% include 'partials/_messages.html' %}
     {% block content %}{% endblock %}
 </div>
 
-<!-- JS -->
+<!-- Container pour les toasts -->
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+<!-- JS Libraries -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- Bootstrap Bundle JS (un seul lien) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<!-- Votre JavaScript -->
 <script>
     // DOM Elements
     const toggleBtn = document.getElementById("toggleSidebar");
     const sidebar = document.getElementById("sidebar");
     const main = document.getElementById("main");
-    const globalSpinner = document.getElementById("globalSpinner");
-    const loadingIndicator = document.getElementById("loadingIndicator");
     const refreshBtn = document.getElementById("refreshBtn");
 
     // Toggle Sidebar
@@ -371,101 +303,17 @@
         }
     });
 
-    // Global loading functions
-    function showLoading(message = 'Chargement...') {
-        if (globalSpinner.querySelector('.spinner-text')) {
-            globalSpinner.querySelector('.spinner-text').textContent = message;
-        }
-        globalSpinner.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-
-    function hideLoading() {
-        globalSpinner.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function showLoadingIndicator() {
-        loadingIndicator.style.display = 'block';
-    }
-
-    function hideLoadingIndicator() {
-        loadingIndicator.style.display = 'none';
-    }
-
     // Refresh button
     if (refreshBtn) {
         refreshBtn.addEventListener('click', function() {
-            showLoadingIndicator();
-            setTimeout(() => {
-                window.location.reload();
-            }, 300);
+            window.location.reload();
         });
     }
 
-    // Form submission with loading
-    document.addEventListener('submit', function(e) {
-        if (e.target.matches('form:not(.no-loading)')) {
-            showLoading('Traitement en cours...');
-        }
-    });
-
-    // AJAX requests with loading
-    const originalFetch = window.fetch;
-    window.fetch = function(url, options = {}) {
-        const isAjax = options.headers && 
-                      (options.headers['X-Requested-With'] === 'XMLHttpRequest' ||
-                       options.headers['Content-Type'] === 'application/json');
-        
-        if (!isAjax) return originalFetch(url, options);
-        
-        showLoadingIndicator();
-        
-        return originalFetch(url, options)
-            .then(response => {
-                hideLoadingIndicator();
-                return response;
-            })
-            .catch(error => {
-                hideLoadingIndicator();
-                throw error;
-            });
-    };
-
-    // Show loading on navigation
-    document.addEventListener('click', function(e) {
-        const link = e.target.closest('a');
-        if (link && 
-            link.href && 
-            !link.href.includes('#') && 
-            !link.href.includes('javascript:') &&
-            link.href.startsWith(window.location.origin) &&
-            !link.target === '_blank' &&
-            !link.classList.contains('no-loading')) {
-            showLoading('Chargement de la page...');
-        }
-    });
-
-    // Handle browser back/forward
-    window.addEventListener('beforeunload', function() {
-        showLoadingIndicator();
-    });
-
-    window.addEventListener('load', function() {
-        hideLoading();
-        hideLoadingIndicator();
-    });
-
     // Toast notification function
     function showToast(type, message, duration = 3000) {
-        const toastContainer = document.getElementById('toastContainer') || (() => {
-            const container = document.createElement('div');
-            container.id = 'toastContainer';
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            document.body.appendChild(container);
-            return container;
-        })();
-
+        const toastContainer = document.getElementById('toastContainer');
+        
         const toastId = 'toast-' + Date.now();
         const toastHtml = `
             <div id="${toastId}" class="toast align-items-center text-bg-${type} border-0" role="alert">
@@ -488,19 +336,17 @@
         });
     }
 
-    // Make functions globally available
-    window.showLoading = showLoading;
-    window.hideLoading = hideLoading;
-    window.showLoadingIndicator = showLoadingIndicator;
-    window.hideLoadingIndicator = hideLoadingIndicator;
-    window.showToast = showToast;
-
-    // Button spinner helper
-    function setButtonLoading(button, isLoading) {
+    // Button loading helper
+    function setButtonLoading(button, isLoading, text = null) {
         if (isLoading) {
             const originalContent = button.innerHTML;
             button.dataset.originalContent = originalContent;
-            button.innerHTML = '<span class="btn-spinner"></span>' + originalContent;
+            
+            if (text) {
+                button.innerHTML = '<span class="btn-spinner"></span>' + text;
+            } else {
+                button.innerHTML = '<span class="btn-spinner"></span>' + originalContent;
+            }
             button.disabled = true;
         } else {
             if (button.dataset.originalContent) {
@@ -511,10 +357,10 @@
         }
     }
 
+    // Make functions globally available
+    window.showToast = showToast;
     window.setButtonLoading = setButtonLoading;
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
 {% block extra_js %}{% endblock %}
 </body>

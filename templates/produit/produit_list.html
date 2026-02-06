@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/colvis/2.9.0/css/colvis.bootstrap5.min.css">
 <style>
 .card {
     border-radius: 0.75rem;
@@ -137,15 +138,12 @@ table.dataTable tbody tr:hover {
 .compact-row {
     min-height: 35px;
 }
-/* Réduire l'espacement */
 .mb-3 {
     margin-bottom: 0.75rem !important;
 }
-/* Positionner le tableau plus haut */
 .table-container {
     margin-top: 0.25rem;
 }
-/* Style pour le lien de détail */
 .detail-link {
     color: #0d6efd;
     text-decoration: none;
@@ -157,7 +155,6 @@ table.dataTable tbody tr:hover {
     color: #084298;
     text-decoration: underline;
 }
-/* Style pour les lignes sélectionnées */
 .selection-info {
     background: #f8f9fa;
     padding: 0.5rem;
@@ -168,7 +165,6 @@ table.dataTable tbody tr:hover {
 .selection-info .badge {
     font-size: 0.75rem;
 }
-/* Contrôles de sélection */
 .selection-controls {
     background: #f8f9fa;
     border-radius: 0.5rem;
@@ -179,7 +175,6 @@ table.dataTable tbody tr:hover {
     font-size: 0.75rem;
     padding: 0.2rem 0.4rem;
 }
-/* Couleurs pour les prix */
 .price-achat {
     color: #6c757d;
     font-weight: 500;
@@ -191,6 +186,77 @@ table.dataTable tbody tr:hover {
 .price-gros {
     color: #0d6efd;
     font-weight: 600;
+}
+/* Styles pour les en-têtes de colonne triables */
+table.dataTable thead th.sorting {
+    cursor: pointer;
+    position: relative;
+    padding-right: 26px !important;
+}
+table.dataTable thead th.sorting:after {
+    content: "↕";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    opacity: 0.5;
+}
+table.dataTable thead th.sorting_asc:after {
+    content: "↑";
+    font-weight: bold;
+    opacity: 1;
+}
+table.dataTable thead th.sorting_desc:after {
+    content: "↓";
+    font-weight: bold;
+    opacity: 1;
+}
+/* Style pour la barre de recherche et pagination */
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    margin-bottom: 0.5rem;
+}
+.dataTables_wrapper .dataTables_filter label {
+    margin-bottom: 0;
+}
+.dataTables_wrapper .dataTables_filter input {
+    width: 250px !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 0.5rem;
+}
+.dataTables_wrapper .dataTables_length label {
+    margin-bottom: 0;
+}
+.dt-buttons {
+    margin-bottom: 0.5rem;
+}
+.dataTables_info {
+    padding-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+.dataTables_paginate {
+    padding-top: 0.5rem;
+}
+.dataTables_paginate .paginate_button {
+    padding: 0.25rem 0.5rem;
+    margin: 0 2px;
+    font-size: 0.8rem;
+    border-radius: 0.25rem;
+}
+.dataTables_paginate .paginate_button.current {
+    background: #0d6efd;
+    color: white !important;
+    border-color: #0d6efd;
+}
+/* Contrôles de sélection */
+#selectionControls {
+    display: none;
 }
 </style>
 {% endblock %}
@@ -246,7 +312,7 @@ table.dataTable tbody tr:hover {
                 </div>
             </div>
         </div>
-</div>
+    </div>
     <div class="col-md-3">
         <div class="card border-left-warning shadow-sm h-100 stat-card" data-filter="critique" style="min-height: 70px;">
             <div class="card-body p-2">
@@ -279,7 +345,7 @@ table.dataTable tbody tr:hover {
     </div>
 </div>
 
-<!-- Filtres rapides -->
+<!-- Filtres rapides 
 <div class="card filters-card mb-2">
     <div class="card-body p-2">
         <div class="row align-items-center">
@@ -299,9 +365,9 @@ table.dataTable tbody tr:hover {
         </div>
     </div>
 </div>
-
-<!-- Contrôles de sélection -->
-<!-- <div class="selection-controls d-flex justify-content-between align-items-center" id="selectionControls" style="display: none !important;">
+-->
+<!-- Contrôles de sélection
+<div class="selection-controls d-flex justify-content-between align-items-center" id="selectionControls">
     <div>
         <span class="text-muted" style="font-size: 0.8rem;">
             <i class="bi bi-check-square me-1"></i>
@@ -330,11 +396,11 @@ table.dataTable tbody tr:hover {
 <div class="card shadow-sm table-container">
     <div class="card-header bg-white border-bottom-0 pb-1 pt-2">
         <div class="d-flex justify-content-between align-items-center">
-            <h5 class="mb-0" style="font-size: 0.95rem;">
+            <!-- <h5 class="mb-0" style="font-size: 0.95rem;">
                 <i class="bi bi-table me-2"></i>Liste des Produits
                 <small class="text-muted ms-2" id="tableInfo" style="font-size: 0.75rem;"></small>
-            </h5>
-            <div class="dropdown export-dropdown">
+            </h5> -->
+            <!-- <div class="dropdown export-dropdown">
                 <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     <i class="bi bi-download me-1"></i> Exporter
                 </button>
@@ -346,7 +412,7 @@ table.dataTable tbody tr:hover {
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" id="exportVisible"><i class="bi bi-eye me-2"></i> Exporter visible</a></li>
                 </ul>
-            </div>
+            </div> -->
         </div>
     </div>
     <div class="card-body p-1">
@@ -409,15 +475,6 @@ table.dataTable tbody tr:hover {
                         </td>
                         <td class="text-center">
                             <div class="d-flex align-items-center justify-content-center">
-                                <!-- <div class="progress progress-thin flex-grow-1 me-1">
-                                    {% if produit.etat_stock == 'rupture' %}
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
-                                    {% elif produit.etat_stock == 'critique' %}
-                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 30%"></div>
-                                    {% else %}
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 70%"></div>
-                                    {% endif %}
-                                </div> -->
                                 <div class="fw-bold" style="font-size: 0.8rem;">
                                     {% if produit.quantite_stock %}{{ produit.quantite_stock }}{% else %}0{% endif %}
                                 </div>
@@ -546,11 +603,6 @@ table.dataTable tbody tr:hover {
                                     <input type="number" class="form-control" id="stock_minimum" name="stock_minimum" min="0" value="0">
                                     <div class="invalid-feedback" id="stock_minimumError"></div>
                                 </div>
-                                <!-- <div class="col-md-6">
-                                    <label class="form-label">Quantité en stock</label>
-                                    <input type="number" class="form-control" id="quantite_stock" name="quantite_stock" min="0" value="0">
-                                    <div class="invalid-feedback" id="quantite_stockError"></div>
-                                </div> -->
                             </div>
                             
                             <div class="mb-3">
@@ -645,11 +697,11 @@ table.dataTable tbody tr:hover {
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
@@ -668,14 +720,13 @@ let currentFilter = 'all';
 
 // Fonction pour mettre à jour l'information de sélection
 function updateSelectionInfo() {
+    if (!table) return;
+    
     const selectedCount = table.rows({ selected: true }).count();
     const totalCount = table.rows().count();
     
     // Mettre à jour le compteur
     document.getElementById('selectedCount').textContent = selectedCount;
-    
-    // Mettre à jour l'info du tableau
-    document.getElementById('tableInfo').textContent = `${selectedCount} sélectionné(s) sur ${totalCount}`;
     
     // Afficher/masquer les contrôles de sélection
     const selectionControls = document.getElementById('selectionControls');
@@ -684,6 +735,28 @@ function updateSelectionInfo() {
     } else {
         selectionControls.style.display = 'none';
     }
+}
+
+// Fonction pour mettre à jour l'information du tableau
+function updateTableInfo() {
+    if (!table) return;
+    
+    const totalRows = table.rows().count();
+    const filteredRows = table.rows({ search: 'applied' }).count();
+    const pageInfo = table.page.info();
+    
+    let infoText = `Affichage de ${pageInfo.start + 1} à ${pageInfo.end} sur ${filteredRows} éléments`;
+    
+    if (filteredRows !== totalRows) {
+        infoText += ` (filtrés depuis ${totalRows} au total)`;
+    }
+    
+    const selectedCount = table.rows({ selected: true }).count();
+    if (selectedCount > 0) {
+        infoText += ` | ${selectedCount} sélectionné(s)`;
+    }
+    
+    document.getElementById('tableInfo').textContent = infoText;
 }
 
 // Fonction pour ouvrir modal
@@ -720,7 +793,6 @@ function loadProduitData(produitId) {
                 document.getElementById('prix_vente_detail').value = produit.prix_vente_detail;
                 document.getElementById('prix_vente_gros').value = produit.prix_vente_gros || '';
                 document.getElementById('stock_minimum').value = produit.stock_minimum || 0;
-                document.getElementById('quantite_stock').value = produit.quantite_stock || 0;
                 document.getElementById('est_actif').checked = produit.est_actif;
             }
         })
@@ -853,6 +925,7 @@ function deleteProduit() {
             if (table) {
                 table.row($(`tr[data-id="${produitToDeleteId}"]`)).remove().draw();
                 updateSelectionInfo();
+                updateTableInfo();
             }
         } else {
             showToast('error', data.message || 'Erreur lors de la suppression');
@@ -946,6 +1019,7 @@ function confirmDeleteMultiple() {
             // Supprimer les lignes sélectionnées
             selectedRows.remove().draw();
             updateSelectionInfo();
+            updateTableInfo();
         } else {
             showToast('error', data.message || 'Erreur lors de la suppression');
         }
@@ -1052,17 +1126,28 @@ $(document).ready(function() {
     // Initialiser DataTable avec sélection avancée
     table = $('#produitsTable').DataTable({
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json',
+            search: "Rechercher dans le tableau:",
+            searchPlaceholder: "Rechercher un produit...",
+            lengthMenu: "Afficher _MENU_ éléments",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+            infoEmpty: "Aucun élément à afficher",
+            infoFiltered: "(filtrés depuis _MAX_ éléments au total)",
+            paginate: {
+                first: "Premier",
+                last: "Dernier",
+                next: "Suivant",
+                previous: "Précédent"
+            }
         },
         responsive: true,
-        
-        pageLength: 25,
-        
-        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Tous"]],
+        pageLength: 100, // Pagination à 100 par défaut
+        lengthMenu: [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "Tous"]],
         order: [[1, 'asc']],
-        dom: '<"row"<"col-sm-12 col-md-6"B><"col-sm-12 col-md-6"f>>' +
+        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row mb-2"<"col-sm-12"B>>' +
              '<"row"<"col-sm-12"tr>>' +
-             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+             '<"row mt-2"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         buttons: [
             {
                 extend: 'excelHtml5',
@@ -1132,11 +1217,11 @@ $(document).ready(function() {
         columnDefs: [
             {
                 orderable: false,
-                targets: [0, 9]
+                targets: [0, 9] // Colonne sélection et actions non triables
             },
             {
                 searchable: false,
-                targets: [0, 9]
+                targets: [0, 9] // Colonne sélection et actions non recherchables
             },
             {
                 className: 'select-checkbox',
@@ -1146,7 +1231,34 @@ $(document).ready(function() {
         scrollY: '550px',
         scrollCollapse: true,
         paging: true,
-        info: true
+        info: true,
+        stateSave: true, // Sauvegarder l'état (tri, pagination, recherche)
+        stateDuration: 60 * 60 * 24 * 7, // Conserver l'état pendant 7 jours
+        initComplete: function() {
+            // Personnaliser le champ de recherche
+            $('#produitsTable_filter input')
+                .attr('placeholder', 'Rechercher nom, référence, catégorie...')
+                .addClass('form-control form-control-sm')
+                .css({
+                    'width': '250px',
+                    'display': 'inline-block'
+                });
+            
+            // Personnaliser le sélecteur de pagination
+            $('#produitsTable_length select')
+                .addClass('form-select form-select-sm')
+                .css({
+                    'width': '80px',
+                    'display': 'inline-block'
+                });
+            
+            // Mettre à jour l'info du tableau
+            updateTableInfo();
+        },
+        drawCallback: function() {
+            // Mettre à jour l'info après chaque redessinage
+            updateTableInfo();
+        }
     });
     
     // Initialiser tooltips
@@ -1222,11 +1334,13 @@ $(document).ready(function() {
     $('#selectAllBtn').on('click', function() {
         table.rows().select();
         updateSelectionInfo();
+        updateTableInfo();
     });
     
     $('#deselectAllBtn').on('click', function() {
         table.rows().deselect();
         updateSelectionInfo();
+        updateTableInfo();
     });
     
     {% if not request.user.est_gerant %}
@@ -1235,9 +1349,10 @@ $(document).ready(function() {
     });
     {% endif %}
     
-    // Écouter les changements de sélection
-    table.on('select deselect', function() {
+    // Écouter les changements de sélection et de dessin
+    table.on('draw.dt select.dt deselect.dt', function() {
         updateSelectionInfo();
+        updateTableInfo();
     });
     
     // Recherche avancée avec délai
@@ -1246,12 +1361,25 @@ $(document).ready(function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             table.search(this.value).draw();
-            updateSelectionInfo();
         }, 300);
     });
     
+    // Charger la préférence de pagination sauvegardée
+    const savedPerPage = localStorage.getItem('produitsPerPage');
+    if (savedPerPage) {
+        table.page.len(parseInt(savedPerPage)).draw();
+    }
+    
+    // Sauvegarder la préférence de pagination
+    $('#produitsTable').on('length.dt', function(e, settings, len) {
+        localStorage.setItem('produitsPerPage', len);
+    });
+    
     // Mettre à jour l'info au chargement initial
-    setTimeout(updateSelectionInfo, 100);
+    setTimeout(() => {
+        updateSelectionInfo();
+        updateTableInfo();
+    }, 100);
 });
 
 // Fonction helper pour les boutons de chargement

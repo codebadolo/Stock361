@@ -3,18 +3,6 @@
 
 {% block content %}
 
-<!-- Breadcrumbs
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            <i class="bi bi-boxes"></i> Gestion du Stock
-        </li>
-    </ol>
-</nav> -->
-
 <!-- En-tête avec titre et actions -->
 <div class="d-flex justify-content-between align-items-center mb-1">
     <div>
@@ -26,16 +14,23 @@
             Suivez et gérez l'inventaire de votre entreprise
         </p>
     </div>
+    
+    <!-- Boutons d'actions avec vérification des permissions -->
     <div class="btn-group" role="group">
-        <a href="{% url 'mouvement_create' %}" class="btn btn-success">
-            <i class="bi bi-plus-circle me-1"></i> Nouveau mouvement
-        </a>
+        {% if request.user.est_super_admin or request.user.est_responsable or request.user.est_gerant %}
+            <a href="{% url 'mouvement_create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i> Nouveau mouvement
+            </a>
+        {% endif %}
+        
         <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-gear me-1"></i> Actions
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="{% url 'produit:produit_list' %}"><i class="bi bi-box-seam me-2"></i> Voir les produits</a></li>
-            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#inventoryModal"><i class="bi bi-clipboard-check me-2"></i> Inventaire physique</a></li>
+            {% if request.user.est_super_admin or request.user.est_responsable %}
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#inventoryModal"><i class="bi bi-clipboard-check me-2"></i> Inventaire physique</a></li>
+            {% endif %}
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-excel me-2"></i> Exporter l'inventaire</a></li>
         </ul>
@@ -132,9 +127,8 @@
 </div>
 
 <div class="row">
-    <!-- Colonne gauche : Tableau des stocks -->
+    <!-- Tableau des stocks -->
     <div class="">
-        <!-- Tableau des stocks -->
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-0 py-3">
                 <div class="d-flex justify-content-between align-items-center">
@@ -167,13 +161,14 @@
                     <table class="table table-hover align-middle mb-0" id="stockTable">
                         <thead class="table-light">
                             <tr> 
-                           
                                 <th class="ps-4">Produit</th>
                                 <th class="text-center">Stock actuel</th>
                                 <th class="text-center">Stock minimum</th>
                                 <th class="text-center">Différence</th>
                                 <th class="text-center">État</th>
-                                <th class="text-center">Actions</th>
+                                {% if request.user.est_super_admin or request.user.est_responsable or request.user.est_gerant %}
+                                    <th class="text-center">Actions</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -181,13 +176,7 @@
                             <tr class="stock-row" data-stock-state="{{ s.produit.etat_stock }}">
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <!-- <div class="avatar-placeholder rounded-circle d-flex align-items-center justify-content-center bg-light text-dark me-3"
-                                             style="width:36px; height:36px;">
-                                            <i class="bi bi-box"></i>
-                                        </div> -->
-                                    
                                         <div>
-                                           
                                             <div class="fw-bold">{{ s.produit.nom }}</div>
                                             <div class="text-muted extra-small">
                                                 <i class="bi bi-hash"></i> {{ s.produit.reference }}
@@ -236,34 +225,43 @@
                                         </span>
                                     {% endif %}
                                 </td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{% url 'produit:produit_detail' s.produit.pk %}" 
-                                           class="btn btn-outline-info"
-                                           title="Détails produit"
-                                           data-bs-toggle="tooltip">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <button type="button" 
-                                                class="btn btn-outline-success"
-                                                title="Ajouter du stock"
-                                                data-bs-toggle="tooltip"
-                                                onclick="ajouterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </button>
-                                        <button type="button" 
-                                                class="btn btn-outline-warning"
-                                                title="Ajuster le stock"
-                                                data-bs-toggle="tooltip"
-                                                onclick="ajusterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </div>
-                                </td>
+                                {% if request.user.est_super_admin or request.user.est_responsable or request.user.est_gerant %}
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'produit:produit_detail' s.produit.pk %}" 
+                                               class="btn btn-outline-info"
+                                               title="Détails produit"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if request.user.est_super_admin or request.user.est_responsable %}
+                                                <button type="button" 
+                                                        class="btn btn-outline-success"
+                                                        title="Ajouter du stock"
+                                                        data-bs-toggle="tooltip"
+                                                        onclick="ajouterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <button type="button" 
+                                                        class="btn btn-outline-warning"
+                                                        title="Ajuster le stock"
+                                                        data-bs-toggle="tooltip"
+                                                        onclick="ajusterStock({{ s.produit.pk }}, '{{ s.produit.nom|escapejs }}')">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                            {% elif request.user.est_gerant %}
+                                                <!-- Gérant peut seulement consulter, pas modifier -->
+                                                <span class="text-muted small" title="Seul le responsable peut modifier">
+                                                    <i class="bi bi-lock"></i>
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                {% endif %}
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="{% if request.user.est_super_admin or request.user.est_responsable or request.user.est_gerant %}6{% else %}5{% endif %}" class="text-center py-4">
                                     <div class="text-muted mb-2">
                                         <i class="bi bi-inboxes fs-1"></i>
                                     </div>
@@ -297,155 +295,23 @@
                             <i class="bi bi-x-circle"></i> {{ stock_rupture }} en rupture
                         </span>
                     </small>
-                    <a href="{% url 'mouvement_create' %}" class="btn btn-success btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Ajouter du stock
-                    </a>
+                    {% if request.user.est_super_admin or request.user.est_responsable %}
+                        <a href="{% url 'mouvement_create' %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Ajouter du stock
+                        </a>
+                    {% elif request.user.est_gerant %}
+                        <span class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> Lecture seule
+                        </span>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Colonne droite : Alertes et actions rapides
-    <div class="col-lg-4">
-      
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-white border-0 py-3">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-bell me-2"></i>
-                    Alertes de stock
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if stock_critique > 0 %}
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        <strong>{{ stock_critique }} produit{{ stock_critique|pluralize }} en stock critique</strong>
-                        <p class="mb-0 mt-2 small">
-                            Ces produits ont atteint ou dépassé leur seuil minimum.
-                        </p>
-                    </div>
-                {% endif %}
-                
-                {% if stock_rupture > 0 %}
-                    <div class="alert alert-danger">
-                        <i class="bi bi-x-octagon-fill me-2"></i>
-                        <strong>{{ stock_rupture }} produit{{ stock_rupture|pluralize }} en rupture de stock</strong>
-                        <p class="mb-0 mt-2 small">
-                            Ces produits sont épuisés et nécessitent un réapprovisionnement urgent.
-                        </p>
-                    </div>
-                {% endif %}
-                
-                {% if stock_critique == 0 and stock_rupture == 0 %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        <strong>État des stocks optimal</strong>
-                        <p class="mb-0 mt-2 small">
-                            Tous les produits sont en stock suffisant.
-                        </p>
-                    </div>
-                {% endif %}
-                
-               
-                <div class="mt-3">
-                    <h6 class="fw-bold mb-3">
-                        <i class="bi bi-list-check me-2"></i>
-                        Produits à surveiller
-                    </h6>
-                    <div class="list-group list-group-flush">
-                        {% for s in stocks %}
-                            {% if s.quantite <= s.produit.stock_minimum %}
-                                <div class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-medium">{{ s.produit.nom|truncatechars:25 }}</div>
-                                            <div class="extra-small text-muted">
-                                                Stock: {{ s.quantite }} / Min: {{ s.produit.stock_minimum }}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            {% if s.quantite == 0 %}
-                                                <span class="badge bg-danger">Rupture</span>
-                                            {% else %}
-                                                <span class="badge bg-warning">Critique</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% empty %}
-                            <div class="text-center text-muted py-3">
-                                <i class="bi bi-check-circle fs-4 d-block mb-2"></i>
-                                Aucun produit en alerte
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    -->
-    
-        <!-- <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-0 py-3">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-lightning-charge me-2"></i>
-                    Actions rapides
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'mouvement_create' %}?type=entree" 
-                       class="btn btn-success text-start py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-plus-circle fs-4 me-3"></i>
-                            <div>
-                                <div class="fw-bold">Entrée de stock</div>
-                                <small class="text-muted">Réception de marchandises</small>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <a href="{% url 'mouvement_create' %}?type=sortie" 
-                       class="btn btn-warning text-start py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-dash-circle fs-4 me-3"></i>
-                            <div>
-                                <div class="fw-bold">Sortie de stock</div>
-                                <small class="text-muted">Vente ou retrait</small>
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <button type="button" 
-                            class="btn btn-info text-start py-3"
-                            data-bs-toggle="modal" 
-                            data-bs-target="#inventoryModal">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-clipboard-check fs-4 me-3"></i>
-                            <div>
-                                <div class="fw-bold">Inventaire physique</div>
-                                <small class="text-muted">Réconciliation des stocks</small>
-                            </div>
-                        </div>
-                    </button>
-                    
-                    <a href="{% url 'produit:produit_list' %}" 
-                       class="btn btn-outline-primary text-start py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-box-seam fs-4 me-3"></i>
-                            <div>
-                                <div class="fw-bold">Gérer les produits</div>
-                                <small class="text-muted">Catalogue complet</small>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div> -->
     </div>
 </div>
 
-<!-- Modal inventaire physique -->
+<!-- Modal inventaire physique (seulement pour super admin et responsable) -->
+{% if request.user.est_super_admin or request.user.est_responsable %}
 <div class="modal fade" id="inventoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -478,6 +344,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <style>
 .avatar-placeholder {
@@ -500,9 +367,6 @@
 .border-left-success { border-left: 4px solid #198754 !important; }
 .border-left-warning { border-left: 4px solid #ffc107 !important; }
 .border-left-info { border-left: 4px solid #0dcaf0 !important; }
-.list-group-item:hover {
-    background-color: #f8f9fa;
-}
 </style>
 
 <script>
@@ -550,31 +414,55 @@ function filterStock(state) {
     });
 }
 
-// Fonctions pour les actions
+// Fonctions pour les actions avec vérification des permissions
 function ajouterStock(produitId, produitNom) {
-    // Rediriger vers la page d'ajout de stock avec le produit pré-sélectionné
+    // Vérifier les permissions côté client
+    const userRoles = {
+        isSuperAdmin: {% if request.user.est_super_admin %}true{% else %}false{% endif %},
+        isResponsable: {% if request.user.est_responsable %}true{% else %}false{% endif %},
+        isGerant: {% if request.user.est_gerant %}true{% else %}false{% endif %}
+    };
+    
+    if (!userRoles.isSuperAdmin && !userRoles.isResponsable) {
+        showToast('warning', 'Vous n\'avez pas la permission de modifier le stock.', 3000);
+        return;
+    }
+    
     window.location.href = `{% url 'mouvement_create' %}?produit=${produitId}&type=entree`;
 }
 
 function ajusterStock(produitId, produitNom) {
-    // Rediriger vers la page d'ajustement de stock
+    // Vérifier les permissions côté client
+    const userRoles = {
+        isSuperAdmin: {% if request.user.est_super_admin %}true{% else %}false{% endif %},
+        isResponsable: {% if request.user.est_responsable %}true{% else %}false{% endif %},
+        isGerant: {% if request.user.est_gerant %}true{% else %}false{% endif %}
+    };
+    
+    if (!userRoles.isSuperAdmin && !userRoles.isResponsable) {
+        showToast('warning', 'Vous n\'avez pas la permission d\'ajuster le stock.', 3000);
+        return;
+    }
+    
     window.location.href = `{% url 'mouvement_create' %}?produit=${produitId}&type=ajustement`;
 }
 
-// Calculer les statistiques de stock
-function calculerStatistiques() {
-    const rows = document.querySelectorAll('#stockTable tbody tr.stock-row');
-    let normal = 0, critique = 0, rupture = 0;
+// Afficher un message basé sur le rôle
+function showRoleMessage() {
+    const role = "{{ request.user.get_role_display }}";
+    const messages = {
+        'Super Admin': 'Vous avez tous les droits de gestion du stock.',
+        'Responsable': 'Vous pouvez gérer les entrées et sorties de stock.',
+        'Gérant': 'Vous avez un accès en lecture seule au stock.'
+    };
     
-    rows.forEach(row => {
-        const state = row.getAttribute('data-stock-state');
-        if (state === 'normal') normal++;
-        else if (state === 'critique') critique++;
-        else if (state === 'rupture') rupture++;
-    });
-    
-    console.log(`Normal: ${normal}, Critique: ${critique}, Rupture: ${rupture}`);
+    if (messages[role]) {
+        console.log('Rôle détecté:', role, '-', messages[role]);
+    }
 }
+
+// Exécuter au chargement
+showRoleMessage();
 </script>
 
 {% endblock %}

@@ -4,7 +4,7 @@
 {% block content %}
 
 <!-- Breadcrumbs -->
-<nav aria-label="breadcrumb" class="mb-4">
+<nav aria-label="breadcrumb" class="mb-1">
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Dashboard</a>
@@ -67,7 +67,7 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Actions rapides image -->
+                        <!-- Actions rapides image 
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-outline-primary">
                                 <i class="bi bi-arrows-fullscreen"></i> Agrandir
@@ -76,6 +76,7 @@
                                 <i class="bi bi-download"></i> Télécharger
                             </button>
                         </div>
+                        -->
                     </div>
                     
                     <!-- Informations détaillées -->
@@ -173,14 +174,15 @@
                                     <div>
                                         <div class="text-muted small">Entreprise</div>
                                         <div class="fw-medium">
-                                            {% if produit.entreprise %}
+                                            <h4 class="text-muted small "> {{produit.entreprise.nom}}</h4>
+                                            <!-- {% if produit.entreprise %}
                                                 <a href="{% url 'entreprise_detail' produit.entreprise.id %}" 
                                                    class="text-decoration-none">
                                                     {{ produit.entreprise.nom }}
                                                 </a>
                                             {% else %}
                                                 <span class="text-muted">Non assigné</span>
-                                            {% endif %}
+                                            {% endif %} -->
                                         </div>
                                     </div>
                                 </div>
@@ -282,7 +284,7 @@
     
     <!-- Colonne droite : Actions et statistiques -->
     <div class="col-lg-4 mb-4">
-        <!-- Carte actions rapides -->
+        <!-- Carte actions rapides 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="card-title mb-0">
@@ -346,9 +348,9 @@
                 </div>
             </div>
         </div>
-        
+        -->
         <!-- Carte état du stock -->
-        <div class="card shadow-sm border-0 mt-4">
+        <div class="card shadow-sm border-0 ">
             <div class="card-header bg-white border-0 py-3">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-graph-up me-2"></i>État du Stock

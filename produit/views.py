@@ -22,7 +22,7 @@ class ProduitListView(LoginRequiredMixin, ListView):
     model = Produit
     template_name = 'produit/produit_list.html'
     context_object_name = 'produits'
-    #paginate_by = 
+    paginate_by = 100
     
     def get_queryset(self):
         user = self.request.user
