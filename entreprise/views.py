@@ -151,6 +151,10 @@ def dashboard_view(request):
     
     return render(request, 'entreprise/dashboard.html', context)
 
+
+class NotFoundView(DetailView):
+    template_name = '404.html'
+    
 # --- Entreprises ---
 class EntrepriseListView(SuperAdminRequiredMixin, ListView):
     model = Entreprise
